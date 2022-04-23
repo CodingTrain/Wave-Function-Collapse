@@ -2,7 +2,7 @@ const tiles = [];
 
 let grid = [];
 
-const DIM = 8;
+const DIM = 20;
 
 const BLANK = 0;
 const UP = 1;
@@ -44,11 +44,12 @@ const rules = [
 ];
 
 function preload() {
-  tiles[0] = loadImage('tiles/blank.png');
-  tiles[1] = loadImage('tiles/up.png');
-  tiles[2] = loadImage('tiles/right.png');
-  tiles[3] = loadImage('tiles/down.png');
-  tiles[4] = loadImage('tiles/left.png');
+  const path = 'mountains';
+  tiles[0] = loadImage(`${path}/blank.png`);
+  tiles[1] = loadImage(`${path}/up.png`);
+  tiles[2] = loadImage(`${path}/right.png`);
+  tiles[3] = loadImage(`${path}/down.png`);
+  tiles[4] = loadImage(`${path}/left.png`);
 }
 
 function setup() {
