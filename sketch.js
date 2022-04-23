@@ -2,7 +2,7 @@ const tiles = [];
 
 let grid = [];
 
-const DIM = 20;
+const DIM = 6;
 
 const BLANK = 0;
 const UP = 1;

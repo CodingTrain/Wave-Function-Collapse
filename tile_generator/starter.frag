@@ -25,7 +25,8 @@ vec3 colorGradient(vec2 uv, vec3 col1, vec3 col2, float m) {
   vec3 col = mix(col1, col2, k);
   return col;
 }  
-/
+
+// Rotation matrix
 mat2 Rot(float a) {
     float s=sin(a), c=cos(a);
     return mat2(c, -s, s, c);
@@ -60,6 +61,65 @@ float sdRhombus( vec2 uv, vec2 b )
 
 float Arc( vec2 uv, float r1, float r2) {
   return abs(sdCircle(uv, r1)) - r2;
+}
+
+// From Inigo Quilez
+float sdRoundedBox( vec2 uv, vec2 b, vec4 r) {
+  r.xy = (uv.x>0.0) ? r.xy : r.zw;
+  r.x = (uv.y>0.0) ? r.x : r.y;
+  vec2 q = abs(uv) - b + r.x;
+  return min( max(q.x, q.y), 0.0) + length(max(q, 0.0) ) - r.x;
+}
+
+vec3 sdTrack( vec2 uv, float r, vec3 col) {
+  vec2 gv = uv;
+  vec2 st = uv;
+  vec2 md = uv;
+  uv.y = abs(uv.y);
+  float s1 =  abs(sdRoundedBox( uv - vec2(.4, .4), vec2(.3, .3), vec4(.175, .175, .175, .25)) ) -  r;
+  float m1 = S(.008, .0, s1);
+  float s2 =  abs(sdRoundedBox( uv - vec2(.45, .45), vec2(.3, .3), vec4(.175, .175, .175, .22)) ) -  r;
+  float m2 = S(.008, .0, s2);
+  float s3 = sdBox((Rot(PI* 3./4.)*(md - vec2(.195, .195)) - vec2(.0, .0)), vec2(.01, .05) );
+  float m3 = S(.008, .0, s3);
+  float s4 = sdBox((Rot(PI* 13./16.)*(uv - vec2(.25, .15)) - vec2(.0, .0)), vec2(.01, .05) );
+  float m4 = S(.008, .0, s4);
+   float s5 = sdBox((Rot(PI* 15./16.)*(uv - vec2(.32, .13)) - vec2(.0, .0)), vec2(.01, .05) );
+  float m5 = S(.008, .0, s5);
+   gv.x = abs(gv.x);
+  float s6 = sdBox((uv - vec2(.46, .125)), vec2(.01, .05) );
+  float m6 = S(.008, .0, s6);
+  float s7 = sdBox((uv - vec2(.39, .125)), vec2(.01, .05) );
+  float m7 = S(.008, .0, s7);
+   float s8 = sdBox((Rot(PI* 1./4.)*(md - vec2(.195, -.195)) - vec2(.0, .0)), vec2(.01, .05) );
+  float m8 = S(.008, .0, s8);
+  float s9 = sdBox((Rot(PI* 11./16.)*(uv - vec2(.15, .25)) - vec2(.0, .0)), vec2(.01, .05) );
+  float m9 = S(.008, .0, s9);
+   float s10 = sdBox((Rot(PI* 9.5/16.)*(uv - vec2(.13, .32)) - vec2(.0, .0)), vec2(.01, .05) );
+  float m10 = S(.008, .0, s10);
+  float s11 = sdBox((vec2(gv.x, uv.y) - vec2(.125, .46)), vec2(.05, .01) );
+  float m11 = S(.008, .0, s11);
+  float s12 = sdBox((vec2(gv.x, uv.y) - vec2(.125, .39)), vec2(.05, .01) );
+  float m12 = S(.008, .0, s12);
+  st.y = abs(st.y);
+  // Straight train tracks
+  float s13 = sdBox(uv - vec2(-.15, 0.), vec2(.001, 1.));
+  float m13 = S(.008, .0, s13);
+  float s14 = sdBox(uv - vec2(-.10, 0.), vec2(.001, 1.));
+  float m14 = S(.008, .0, s14);
+  float s15 = sdBox((st - vec2(-.125, .04)), vec2(.05, .01) );
+  float m15 = S(.008, .0, s15);
+  float s16 = sdBox((st - vec2(-.125, .11)), vec2(.05, .01) );
+  float m16 = S(.008, .0, s16);
+  float s17 = sdBox((st - vec2(-.125, .18)), vec2(.05, .01) );
+  float m17 = S(.008, .0, s17);
+  float s18 = sdBox((st - vec2(-.125, .25)), vec2(.05, .01) );
+  float m18 = S(.008, .0, s18);
+  float s19 = sdBox((st - vec2(-.125, .32)), vec2(.05, .01) );
+  float m19 = S(.008, .0, s19);
+  float m =  m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10 
+        + m11 + m12 + m13 + m14 + m15 + m16 + m17 + m18 + m19;
+  return m * col;
 }
 
 float sdT( vec2 uv, float width) {
@@ -110,30 +170,18 @@ float opRhombus( vec2 uv, float r1, float r2) {
   return abs( sdRhombus(uv, vec2(r1)) )- r2;
 }
 
-vec3 sdRhombusTile( vec2 uv, vec3 col1, float angle) {
-   vec3 col = vec3(0);
-   vec2 gv = Rot(angle) * uv;
-   float s6 = opRhombus(gv, .33, .025); // outer
-   float m6 = S(.008, .0, s6);  
-   float s7 = sdBox(abs(gv) - vec2(.2, .37), vec2(.026, .25));
-   float m7 = S(.008, .0, s7);  // outer 
-   float rh3 = max(m6, m7);
-  
-   float s4 = opRhombus(gv, .23, .025); // middle
-   float m4 = S(.008, .0, s4);  
-   float s5= sdBox(abs(gv) - vec2(.1, .37), vec2(.026, .25));
-   float m5= S(.008, .0, s5); // middle
-   float rh2 = max(m4,m5);
-  
-   float s1 = opRhombus(gv, .13, .025); //center
+vec3 sdRhombusTile( vec2 uv, vec3 col1, vec3 col2, vec3 col3) {
+   
+   float s1 = opRhombus(uv, .13, .025); //center
    float m1 = S(.008, .0, s1);
-   float s2 = sdBox(gv - vec2(.0, .3), vec2(.026, .20));  
-   float m2 = S(.008, .0, s2); 
-   float s3 = sdBox(gv - vec2(.0, -.3), vec2(.026, .20));  
-   float m3 = S(.008, .0, s3); 
-   float rh1 = max(max(m1, m2), m3) ;
-     
-   return col =  max(max(rh3, rh2), rh1) * col1;
+   
+   float s2 = opRhombus(uv, .23, .025); // middle
+   float m2 = S(.008, .0, s2);  
+  
+   float s3 = opRhombus(uv, .33, .025); // outer
+   float m3 = S(.008, .0, s3);  
+   vec3 col = vec3(0);
+   return col += m1*col1 + m2*col2 + m3*col3;
 }
 
 vec3 sdStripes( vec2 uv, vec3 col1, vec3 col2, vec3 col3, float angle, float width) {
@@ -164,7 +212,7 @@ void main()
 	
     vec3 col = vec3(0);
   
-    // Add background color
+    // Add background color -- BLANK
     col += DARK; 
   
     // Uncomment to check for symmetry
@@ -174,32 +222,40 @@ void main()
     float s2 = S(.008, .0, d2); // vertical center line
     //col += s1 + s2;
   
+   // Rhombus at center, same options as BLANK
+   vec3 rhombus_tile = sdRhombusTile(uv, BLUE, RASPBERRY, GREEN);
+  // vec3 rhombus_tile = sdRhombusTile(uv, BLUE, BLUE, BLUE);
+   //col = max(col, rhombus_tile);
+  
    // Change a (angle) to get Up, Down, Right, Left
    // a = 0. vertical, a = 1. horizontal
    float a = 0.; //  Right 0., Up  1., Left 2., Down 3. 
   
-   // "T" connector tiles
+   // Create RIGHT, UP, LEFT, DOWN tiles
    // vec3 tile  = sdTile(uv, BLUE, RASPBERRY, GREEN, PI* a/2., .25);
    vec3 tile  = sdTile(uv, BLUE, BLUE, BLUE, PI* a/2., .25);
-   // col = max(tile, col); 
+   //col = max(tile, col); 
    
+  
+    // Train tracks
+    vec2 gv = Rot(a)*uv;
+    vec3 t = sdTrack(gv, .001, BLUE);
+    col += t;
+  
    // Horizontal and Vertical Stripes
-   // vec3 vert_stripes  = sdStripes(uv, BLUE, RASPBERRY, GREEN, PI* a/2., .25);
+   // vec3 vert_stripes  = sdStripes(uv, BLUE, RASPBERRY, GREEN, PI*a/2., .25);
    // single color version
    vec3 vert_stripes  = sdStripes(uv, BLUE, BLUE, BLUE, PI* a/2., .25);
    //col = max(hor_stripes, col); 
    //col = max(vert_stripes, col); 
   
-   // Cross with horiztontal and vertical stripes
-  // vec3 hor_stripes = sdStripes(uv, BLUE, RASPBERRY, GREEN, PI*/2., .25);
-   vec3 hor_stripes  = sdStripes(uv, BLUE, BLUE, BLUE, PI*/2., .25);
+   // Cross with vertical and horizontal stripes
+   // vec3 hor_stripes = sdStripes(uv, BLUE, RASPBERRY, GREEN, PI*a/2., .25);
+   vec3 hor_stripes  = sdStripes(uv, BLUE, BLUE, BLUE, PI*a/2., .25);
    
    //col = max(max(vert_stripes,horizontal_stripes), col);
   
-   // Horizontal and Vertical Stripes with rhombus at center
-   vec3 rhombus_tile = sdRhombusTile(uv, BLUE, PI* a/2.);
-   //col = max(col, rhombus_tile);
-  
+   
    // Pass a image to add texture (has to be fairly uniform)
    vec3 texture = sdTexture(uv, 0.);
    // col  =  max(texture, col);
