@@ -44,7 +44,7 @@ const rules = [
 ];
 
 function preload() {
-	tiles[0] = loadImage("tiles/blank.png");
+	tiles[0] = loadImage("pipes/blank.png");
 	tiles[1] = loadImage("tiles/up.png");
 	tiles[2] = loadImage("tiles/right.png");
 	tiles[3] = loadImage("tiles/down.png");
