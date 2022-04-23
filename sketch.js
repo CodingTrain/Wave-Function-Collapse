@@ -44,11 +44,11 @@ const rules = [
 ];
 
 function preload() {
-  tiles[0] = loadImage("tiles4/blank.png");
-  tiles[1] = loadImage("tiles4/up.png");
-  tiles[2] = loadImage("tiles4/right.png");
-  tiles[3] = loadImage("tiles4/down.png");
-  tiles[4] = loadImage("tiles4/left.png");
+  tiles[0] = loadImage("tiles/blank.png");
+  tiles[1] = loadImage("tiles/up.png");
+  tiles[2] = loadImage("tiles/right.png");
+  tiles[3] = loadImage("tiles/down.png");
+  tiles[4] = loadImage("tiles/left.png");
 }
 
 function setup() {
