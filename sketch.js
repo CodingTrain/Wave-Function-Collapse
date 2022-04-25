@@ -44,16 +44,17 @@ const rules = [
 ];
 
 function preload() {
-  tiles[0] = loadImage("tiles/blank.png");
-  tiles[1] = loadImage("tiles/up.png");
-  tiles[2] = loadImage("tiles/right.png");
-  tiles[3] = loadImage("tiles/down.png");
-  tiles[4] = loadImage("tiles/left.png");
+  const path = 'mountains';
+  tiles[0] = loadImage(`${path}/blank.png`);
+  tiles[1] = loadImage(`${path}/up.png`);
+  tiles[2] = loadImage(`${path}/right.png`);
+  tiles[3] = loadImage(`${path}/down.png`);
+  tiles[4] = loadImage(`${path}/left.png`);
 }
 
 function setup() {
   createCanvas(800, 800);
-  randomSeed(1);
+  randomSeed('SHIFFMAN');
   for (let i = 0; i < DIM * DIM; i++) {
     grid[i] = {
       collapsed: false,
@@ -149,7 +150,7 @@ function draw() {
         }
         // Look right
         if (i < DIM - 1) {
-          console.log(i, j);
+          //console.log(i, j);
           let right = grid[i + 1 + j * DIM];
           let validOptions = [];
           for (let option of right.options) {
