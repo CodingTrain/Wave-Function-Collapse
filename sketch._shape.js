@@ -5,51 +5,35 @@ let grid = [];
 const DIM = 20;
 
 const BLANK = 0;
-const UP = 1;
-const RIGHT = 2;
-const DOWN = 3;
-const LEFT = 4;
+const BGCIRCLE = 1;
+const GBCIRCLE = 2;
+const BGHALFCIRCLE = 3;
+const GBHALFCIRCLE = 4;
+const BGARC = 5;
+const GBARC = 6;
+const BLUE = 7;
 
 const rules = [
-  [
-    [BLANK, UP],
-    [BLANK, RIGHT],
-    [BLANK, DOWN],
-    [BLANK, LEFT],
-  ],
-  [
-    [RIGHT, LEFT, DOWN],
-    [LEFT, UP, DOWN],
-    [BLANK, DOWN],
-    [RIGHT, UP, DOWN],
-  ],
-  [
-    [RIGHT, LEFT, DOWN],
-    [LEFT, UP, DOWN],
-    [RIGHT, LEFT, UP],
-    [BLANK, LEFT],
-  ],
-  [
-    [BLANK, UP],
-    [LEFT, UP, DOWN],
-    [RIGHT, LEFT, UP],
-    [RIGHT, UP, DOWN],
-  ],
-  [
-    [RIGHT, LEFT, DOWN],
-    [BLANK, RIGHT],
-    [RIGHT, LEFT, UP],
-    [UP, DOWN, RIGHT],
-  ],
+    [0,0,0,0],
+    [1,1,1,1],
+    [0,0,0,0],
+    [0,0,0,0],
+    [1,1,1,1],
+    [0,0,1,1],
+    [1,1,0,0],
+    [1,1,1,1],
 ];
 
 function preload() {
-  const path = 'mountains';
+  const path = 'big_shapes';
   tiles[0] = loadImage(`${path}/blank.png`);
-  tiles[1] = loadImage(`${path}/up.png`);
-  tiles[2] = loadImage(`${path}/right.png`);
-  tiles[3] = loadImage(`${path}/down.png`);
-  tiles[4] = loadImage(`${path}/left.png`);
+  tiles[1] = loadImage(`${path}/blue_grey_circle.png`);
+  tiles[2] = loadImage(`${path}/grey_blue_circle.png`);
+  tiles[3] = loadImage(`${path}/blue_grey_circle.png`);
+  tiles[4] = loadImage(`${path}/blue_half_circle.png`);
+  tiles[5] = loadImage(`${path}/grey_blue_arc.png`);
+  tiles[6] = loadImage(`${path}/blue_grey_arc.png`);
+  tiles[7] = loadImage(`${path}/blue.png`);
 }
 
 function setup() {
@@ -58,7 +42,7 @@ function setup() {
   for (let i = 0; i < DIM * DIM; i++) {
     grid[i] = {
       collapsed: false,
-      options: [BLANK, UP, RIGHT, DOWN, LEFT],
+      options: [BLANK, BGCIRCLE, GBCIRCLE, BGHALFCIRCLE, GBHALFCIRCLE, BARC, GARC, BLUE],
     };
   }
 }
