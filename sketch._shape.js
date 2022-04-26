@@ -13,32 +13,34 @@ const BGARC = 5;
 const GBARC = 6;
 const BLUE = 7;
 
-const rules = [
-    [0,0,0,0],
-    [1,1,1,1],
-    [0,0,0,0],
-    [0,0,0,0],
-    [1,1,1,1],
-    [0,0,1,1],
-    [1,1,0,0],
-    [1,1,1,1],
-];
-
 function preload() {
   const path = 'big_shapes';
-  tiles[0] = loadImage(`${path}/blank.png`);
-  tiles[1] = loadImage(`${path}/blue_grey_circle.png`);
-  tiles[2] = loadImage(`${path}/grey_blue_circle.png`);
-  tiles[3] = loadImage(`${path}/blue_grey_circle.png`);
-  tiles[4] = loadImage(`${path}/blue_half_circle.png`);
-  tiles[5] = loadImage(`${path}/grey_blue_arc.png`);
-  tiles[6] = loadImage(`${path}/blue_grey_arc.png`);
-  tiles[7] = loadImage(`${path}/blue.png`);
+  tileImages[0] = loadImage(`${path}/1.png`);
+  tileImages[7] = loadImage(`${path}/2.png`);
+  tileImages[1] = loadImage(`${path}/3.png`);
+  tileImages[2] = loadImage(`${path}/4.png`);
+  tileImages[3] = loadImage(`${path}/5.png`);
+  tileImages[4] = loadImage(`${path}/6.png`);
+  tileImages[5] = loadImage(`${path}/7.png`);
+  tileImages[6] = loadImage(`${path}/8.png`);
+  
 }
 
 function setup() {
   createCanvas(800, 800);
   randomSeed('SHIFFMAN');
+
+  tiles[0] = new tiles(tileImages[0], [0,0,0,0])
+  tiles[1] = new tiles(tileImages[1], [1,1,1,1])
+  tiles[2] = new tiles(tileImages[2], [1,1,1,1])
+  tiles[3] = new tiles(tileImages[3], [0,0,0,0])
+  tiles[4] = new tiles(tileImages[4], [0,0,0,0])
+  tiles[5] = new tiles(tileImages[5], [1,1,1,1])
+  tiles[6] = new tiles(tileImages[6], [0,0,1,1])
+  tiles[7] = new tiles(tileImages[7], [1,1,0,0])
+
+
+
   for (let i = 0; i < DIM * DIM; i++) {
     grid[i] = {
       collapsed: false,
