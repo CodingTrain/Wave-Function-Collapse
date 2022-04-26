@@ -1,53 +1,55 @@
 const tiles = [];
+const tileImages = [];
 
 let grid = [];
 
 const DIM = 20;
 
-const BLANK = 0;
-const BGCIRCLE = 1;
-const GBCIRCLE = 2;
-const BGHALFCIRCLE = 3;
-const GBHALFCIRCLE = 4;
-const BGARC = 5;
-const GBARC = 6;
-const BLUE = 7;
-
 function preload() {
-  const path = 'big_shapes';
+  const path = "big_shapes";
   tileImages[0] = loadImage(`${path}/1.png`);
-  tileImages[7] = loadImage(`${path}/2.png`);
-  tileImages[1] = loadImage(`${path}/3.png`);
-  tileImages[2] = loadImage(`${path}/4.png`);
-  tileImages[3] = loadImage(`${path}/5.png`);
-  tileImages[4] = loadImage(`${path}/6.png`);
-  tileImages[5] = loadImage(`${path}/7.png`);
-  tileImages[6] = loadImage(`${path}/8.png`);
-  
+  tileImages[1] = loadImage(`${path}/2.png`);
+  tileImages[2] = loadImage(`${path}/3.png`);
+  tileImages[3] = loadImage(`${path}/4.png`);
+  tileImages[4] = loadImage(`${path}/5.png`);
+  tileImages[5] = loadImage(`${path}/6.png`);
+  tileImages[6] = loadImage(`${path}/7.png`);
+  tileImages[7] = loadImage(`${path}/8.png`);
 }
 
 function setup() {
   createCanvas(800, 800);
-  randomSeed('SHIFFMAN');
+  // randomSeed(1);
 
-  tiles[0] = new tiles(tileImages[0], [0,0,0,0])
-  tiles[1] = new tiles(tileImages[1], [1,1,1,1])
-  tiles[2] = new tiles(tileImages[2], [1,1,1,1])
-  tiles[3] = new tiles(tileImages[3], [0,0,0,0])
-  tiles[4] = new tiles(tileImages[4], [0,0,0,0])
-  tiles[5] = new tiles(tileImages[5], [1,1,1,1])
-  tiles[6] = new tiles(tileImages[6], [0,0,1,1])
-  tiles[7] = new tiles(tileImages[7], [1,1,0,0])
+  // Loaded and created the tiles
+  tiles[0] = new Tile(tileImages[0], [0,0,0,0]);
+  tiles[1] = new Tile(tileImages[1], [1,1,1,1]);
+  tiles[2] = new Tile(tileImages[2], [0,0,0,0]);
+  tiles[3] = new Tile(tileImages[3], [1,1,1,1]);
+  tiles[4] = new Tile(tileImages[4], [1,0,0,0]);
+  tiles[5] = new Tile(tileImages[5], [0,1,1,1]);
+  tiles[6] = new Tile(tileImages[6], [0,0,1,1]);
+  tiles[7] = new Tile(tileImages[7], [1,1,0,0]);
 
+  for (let i = 2; i < 14; i++) {
+    for (let j = 1; j < 4; j++) {
+      tiles.push(tiles[i].rotate(j));
+    }
+  }
 
-for (let i = 0; i < 8; i ++) {
-  
-}
+  // tiles[2] = tiles[1].rotate(1);
+  // tiles[3] = tiles[1].rotate(2);
+  // tiles[4] = tiles[1].rotate(3);
+
+  // Generate the adjacency rules based on edges
+  for (let i = 0; i < tiles.length; i++) {
+    const tile = tiles[i];
+    tile.analyze(tiles);
+  }
+
+  // Create cell for each spot on the grid
   for (let i = 0; i < DIM * DIM; i++) {
-    grid[i] = {
-      collapsed: false,
-      options: [BLANK, BGCIRCLE, GBCIRCLE, BGHALFCIRCLE, GBHALFCIRCLE, BARC, GARC, BLUE],
-    };
+    grid[i] = new Cell(tiles.length);
   }
 }
 
@@ -81,7 +83,7 @@ function draw() {
       let cell = grid[i + j * DIM];
       if (cell.collapsed) {
         let index = cell.options[0];
-        image(tiles[index], i * w, j * h, w, h);
+        image(tiles[index].img, i * w, j * h, w, h);
       } else {
         fill(0);
         stroke(255);
@@ -125,24 +127,23 @@ function draw() {
       if (grid[index].collapsed) {
         nextGrid[index] = grid[index];
       } else {
-        let options = [BLANK, UP, RIGHT, DOWN, LEFT];
+        let options = new Array(tiles.length).fill(0).map((x, i) => i);
         // Look up
         if (j > 0) {
           let up = grid[i + (j - 1) * DIM];
           let validOptions = [];
           for (let option of up.options) {
-            let valid = rules[option][2];
+            let valid = tiles[option].down;
             validOptions = validOptions.concat(valid);
           }
           checkValid(options, validOptions);
         }
         // Look right
         if (i < DIM - 1) {
-          //console.log(i, j);
           let right = grid[i + 1 + j * DIM];
           let validOptions = [];
           for (let option of right.options) {
-            let valid = rules[option][3];
+            let valid = tiles[option].left;
             validOptions = validOptions.concat(valid);
           }
           checkValid(options, validOptions);
@@ -152,7 +153,7 @@ function draw() {
           let down = grid[i + (j + 1) * DIM];
           let validOptions = [];
           for (let option of down.options) {
-            let valid = rules[option][0];
+            let valid = tiles[option].up;
             validOptions = validOptions.concat(valid);
           }
           checkValid(options, validOptions);
@@ -162,16 +163,14 @@ function draw() {
           let left = grid[i - 1 + j * DIM];
           let validOptions = [];
           for (let option of left.options) {
-            let valid = rules[option][1];
+            let valid = tiles[option].right;
             validOptions = validOptions.concat(valid);
           }
           checkValid(options, validOptions);
         }
 
-        nextGrid[index] = {
-          options,
-          collapsed: false,
-        };
+        // I could immediately collapse if only one option left?
+        nextGrid[index] = new Cell(options);
       }
     }
   }
