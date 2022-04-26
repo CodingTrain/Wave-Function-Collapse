@@ -3,11 +3,11 @@ const tileImages = [];
 
 let grid = [];
 
-const DIM = 25;
+const DIM = 10;
 
 function preload() {
-  const path = "circuit";
-  for (let i = 0; i < 13; i++) {
+  const path = "purple";
+  for (let i = 0; i < 18; i++) {
     tileImages[i] = loadImage(`${path}/${i}.png`);
   }
 }
@@ -16,21 +16,26 @@ function setup() {
   createCanvas(800, 800);
 
   // Loaded and created the tiles
-  tiles[0] = new Tile(tileImages[0], ["AAA", "AAA", "AAA", "AAA"]);
-  tiles[1] = new Tile(tileImages[1], ["BBB", "BBB", "BBB", "BBB"]);
-  tiles[2] = new Tile(tileImages[2], ["BBB", "BCB", "BBB", "BBB"]);
-  tiles[3] = new Tile(tileImages[3], ["BBB", "BDB", "BBB", "BDB"]);
-  tiles[4] = new Tile(tileImages[4], ["ABB", "BCB", "BBA", "AAA"]);
-  tiles[5] = new Tile(tileImages[5], ["ABB", "BBB", "BBB", "BBA"]);
-  tiles[6] = new Tile(tileImages[6], ["BBB", "BCB", "BBB", "BCB"]);
-  tiles[7] = new Tile(tileImages[7], ["BDB", "BCB", "BDB", "BCB"]);
-  tiles[8] = new Tile(tileImages[8], ["BDB", "BBB", "BCB", "BBB"]);
-  tiles[9] = new Tile(tileImages[9], ["BCB", "BCB", "BBB", "BCB"]);
-  tiles[10] = new Tile(tileImages[10], ["BCB", "BCB", "BCB", "BCB"]);
-  tiles[11] = new Tile(tileImages[11], ["BCB", "BCB", "BBB", "BBB"]);
-  tiles[12] = new Tile(tileImages[12], ["BBB", "BCB", "BBB", "BCB"]);
+  tiles[0] = new Tile(tileImages[0], ["PPP", "PPP", "PPP", "PPP"]);
+  tiles[1] = new Tile(tileImages[1], ["MMM", "MMM", "MMM", "MMM"]);
+  tiles[2] = new Tile(tileImages[2], ["MMM", "PPP", "PPP", "MMM"]);
+  tiles[3] = new Tile(tileImages[3], ["PPP", "MMM", "MMM", "PPP"]);
+  tiles[4] = new Tile(tileImages[4], ["MMM", "PPP", "PPP", "PPP"]);
+  tiles[5] = new Tile(tileImages[5], ["PPP", "MMM", "MMM", "MMM"]);
+  tiles[6] = new Tile(tileImages[6], ["MMM", "MMM", "MMM", "MMM"]);
+  tiles[7] = new Tile(tileImages[7], ["PPP", "PPP", "PPP", "PPP"]);
+  tiles[8] = new Tile(tileImages[8], ["MPM", "MMM", "MPM", "MMM"]);
+  tiles[9] = new Tile(tileImages[9], ["PMP", "PPP", "PMP", "PPP"]);
+  tiles[10] = new Tile(tileImages[10], ["MPM", "MPM", "MPM", "MPM"]);
+  tiles[11] = new Tile(tileImages[11], ["PMP", "PMP", "PMP", "PMP"]);
+  tiles[12] = new Tile(tileImages[12], ["MMP", "PMM", "MMM", "MMM"]);
+  tiles[13] = new Tile(tileImages[13], ["PPM", "MPP", "PPP", "PPP"]);
+  tiles[14] = new Tile(tileImages[14], ["MPM", "MPM", "MPM", "MPM"]);
+  tiles[15] = new Tile(tileImages[15], ["PMP", "PMP", "PMP", "PMP"]);
+  tiles[16] = new Tile(tileImages[16], ["MMP", "PMM", "MMP", "PMM"]);
+  tiles[17] = new Tile(tileImages[17], ["PPM", "MPP", "PPM", "MPP"]);
 
-  for (let i = 2; i < 14; i++) {
+  for (let i = 2; i < 18; i++) {
     for (let j = 1; j < 4; j++) {
       tiles.push(tiles[i].rotate(j));
     }
