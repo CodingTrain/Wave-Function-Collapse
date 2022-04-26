@@ -20,7 +20,7 @@ function preload() {
   tileImages[10] = loadImage(`${path}/10.png`);
   tileImages[11] = loadImage(`${path}/11.png`);
   tileImages[12] = loadImage(`${path}/12.png`);
-  tileImages[13] = loadImage(`${path}/4f.png`);
+  //tileImages[13] = loadImage(`${path}/4f.png`);
 }
 
 function setup() {
@@ -28,20 +28,20 @@ function setup() {
   // randomSeed(1);
 
   // Loaded and created the tiles
-  tiles[0] = new Tile(tileImages[0], [0, 0, 0, 0]);
-  tiles[1] = new Tile(tileImages[1], [1, 1, 1, 1]);
-  tiles[2] = new Tile(tileImages[2], [1, 2, 1, 1]);
-  tiles[3] = new Tile(tileImages[3], [1, 3, 1, 3]);
-  tiles[4] = new Tile(tileImages[4], [4, 2, 4, 0]);
-  tiles[5] = new Tile(tileImages[5], [4, 1, 1, 5]);
-  tiles[6] = new Tile(tileImages[6], [1, 2, 1, 2]);
-  tiles[7] = new Tile(tileImages[7], [3, 2, 3, 2]);
-  tiles[8] = new Tile(tileImages[8], [3, 1, 2, 1]);
-  tiles[9] = new Tile(tileImages[9], [2, 2, 1, 2]);
-  tiles[10] = new Tile(tileImages[10], [2, 2, 2, 2]);
-  tiles[11] = new Tile(tileImages[11], [2, 2, 1, 1]);
-  tiles[12] = new Tile(tileImages[12], [1, 2, 1, 2]);
-  tiles[13] = new Tile(tileImages[13], [5, 0, 5, 2]);
+  tiles[0] = new Tile(tileImages[0], ['000', '000', '000', '000']);
+  tiles[1] = new Tile(tileImages[1], ['111', '111', '111', '111']);
+  tiles[2] = new Tile(tileImages[2], ['111', '222', '111', '111']);
+  tiles[3] = new Tile(tileImages[3], ['111', '333', '111', '333']);
+  tiles[4] = new Tile(tileImages[4], ['001', '222', '100', '000']);
+  tiles[5] = new Tile(tileImages[5], ['001', '111', '111', '100']);
+  tiles[6] = new Tile(tileImages[6], ['111', '222', '111', '222']);
+  tiles[7] = new Tile(tileImages[7], ['333', '222', '333', '222']);
+  tiles[8] = new Tile(tileImages[8], ['333', '111', '222', '111']);
+  tiles[9] = new Tile(tileImages[9], ['222', '222', '111', '222']);
+  tiles[10] = new Tile(tileImages[10], ['222', '222', '222', '222']);
+  tiles[11] = new Tile(tileImages[11], ['222', '222', '111', '111']);
+  tiles[12] = new Tile(tileImages[12], ['111', '222', '111', '222']);
+  //tiles[13] = new Tile(tileImages[13], [5, 0, 5, 2]);
 
   for (let i = 2; i < 14; i++) {
     for (let j = 1; j < 4; j++) {
@@ -130,7 +130,8 @@ function draw() {
   const cell = random(gridCopy);
   cell.collapsed = true;
   const pick = random(cell.options);
-  cell.options = [pick];
+  // undefined options? why?
+  cell.options = [pick ? pick : 0];
 
   const nextGrid = [];
   for (let j = 0; j < DIM; j++) {

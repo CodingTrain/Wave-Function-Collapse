@@ -12,22 +12,26 @@ class Tile {
     for (let i = 0; i < tiles.length; i++) {
       let tile = tiles[i];
       // UP
-      if (tile.edges[2] == this.edges[0]) {
+      if (this.reverseEdge(tile.edges[2]) == this.edges[0]) {
         this.up.push(i);
       }
       // RIGHT
-      if (tile.edges[3] == this.edges[1]) {
+      if (this.reverseEdge(tile.edges[3]) == this.edges[1]) {
         this.right.push(i);
       }
       // DOWN
-      if (tile.edges[0] == this.edges[2]) {
+      if (this.reverseEdge(tile.edges[0]) == this.edges[2]) {
         this.down.push(i);
       }
       // LEFT
-      if (tile.edges[1] == this.edges[3]) {
+      if (this.reverseEdge(tile.edges[1]) == this.edges[3]) {
         this.left.push(i);
       }
     }
+  }
+
+  reverseEdge(edge) {
+    return edge.split("").reverse().join("");
   }
 
   rotate(num) {
