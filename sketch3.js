@@ -3,33 +3,37 @@ const tileImages = [];
 
 let grid = [];
 
-const DIM = 20;
+const DIM = 10;
 
 function preload() {
-  const path = "big_shapes";
-  tileImages[0] = loadImage(`${path}/1.png`);
-  tileImages[1] = loadImage(`${path}/2.png`);
-  tileImages[2] = loadImage(`${path}/3.png`);
-  tileImages[3] = loadImage(`${path}/4.png`);
-  tileImages[4] = loadImage(`${path}/5.png`);
-  tileImages[5] = loadImage(`${path}/6.png`);
-  tileImages[6] = loadImage(`${path}/7.png`);
-  tileImages[7] = loadImage(`${path}/8.png`);
+  const path = "purple";
+  for (let i = 0; i < 14; i++) {
+    tileImages[i] = loadImage(`${path}/${i}.png`);
+  }
 }
 
 function setup() {
   createCanvas(800, 800);
-  // randomSeed(1);
 
   // Loaded and created the tiles
-  tiles[0] = new Tile(tileImages[0], [0,0,0,0]);
-  tiles[1] = new Tile(tileImages[1], [1,1,1,1]);
-  tiles[2] = new Tile(tileImages[2], [0,0,0,0]);
-  tiles[3] = new Tile(tileImages[3], [1,1,1,1]);
-  tiles[4] = new Tile(tileImages[4], [1,0,0,0]);
-  tiles[5] = new Tile(tileImages[5], [0,1,1,1]);
-  tiles[6] = new Tile(tileImages[6], [0,0,1,1]);
-  tiles[7] = new Tile(tileImages[7], [1,1,0,0]);
+  tiles[0] = new Tile(tileImages[0], ["PPP", "PPP", "PPP", "PPP"]);
+  tiles[1] = new Tile(tileImages[1], ["MMM", "MMM", "MMM", "MMM"]);
+  tiles[2] = new Tile(tileImages[2], ["MMM", "PPP", "PPP", "MMM"]);
+  tiles[3] = new Tile(tileImages[3], ["PPP", "MMM", "MMM", "PPP"]);
+  tiles[4] = new Tile(tileImages[4], ["MMM", "PPP", "PPP", "PPP"]);
+  tiles[5] = new Tile(tileImages[5], ["PPP", "MMM", "MMM", "MMM"]);
+  tiles[6] = new Tile(tileImages[6], ["MMM", "MMM", "MMM", "MMM"]);
+  tiles[7] = new Tile(tileImages[7], ["PPP", "PPP", "PPP", "PPP"]);
+  tiles[8] = new Tile(tileImages[8], ["MPM", "MMM", "MPM", "MMM"]);
+  tiles[9] = new Tile(tileImages[9], ["PMP", "PPP", "PMP", "PPP"]);
+  tiles[10] = new Tile(tileImages[10], ["MPM", "MPM", "MPM", "MPM"]);
+  tiles[11] = new Tile(tileImages[11], ["PMP", "PMP", "PMP", "PMP"]);
+  tiles[12] = new Tile(tileImages[12], ["PMM", "MMM", "MMP", "PPP"]);
+  tiles[13] = new Tile(tileImages[13], ["MMP", "PPP", "PPM", "MMM"]);
+  //tiles[14] = new Tile(tileImages[14], ["MPM", "MPM", "MPM", "MPM"]);
+  //tiles[15] = new Tile(tileImages[15], ["PMP", "PMP", "PMP", "PMP"]);
+  // tiles[16] = new Tile(tileImages[16], ["MMP", "PMM", "MMP", "PMM"]);
+  // tiles[17] = new Tile(tileImages[17], ["PPM", "MPP", "PPM", "MPP"]);
 
   for (let i = 2; i < 14; i++) {
     for (let j = 1; j < 4; j++) {
@@ -47,6 +51,10 @@ function setup() {
     tile.analyze(tiles);
   }
 
+  startOver();
+}
+
+function startOver() {
   // Create cell for each spot on the grid
   for (let i = 0; i < DIM * DIM; i++) {
     grid[i] = new Cell(tiles.length);
@@ -118,6 +126,10 @@ function draw() {
   const cell = random(gridCopy);
   cell.collapsed = true;
   const pick = random(cell.options);
+  if (pick === undefined) {
+    startOver();
+    return;
+  }
   cell.options = [pick];
 
   const nextGrid = [];
