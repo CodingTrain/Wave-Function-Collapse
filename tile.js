@@ -1,3 +1,13 @@
+function reverseString(s) {
+  let arr = s.split("");
+  arr = arr.reverse();
+  return arr.join("");
+}
+
+function compareEdge(a, b) {
+  return a == reverseString(b);
+}
+
 class Tile {
   constructor(img, edges) {
     this.img = img;
@@ -12,19 +22,19 @@ class Tile {
     for (let i = 0; i < tiles.length; i++) {
       let tile = tiles[i];
       // UP
-      if (tile.edges[2] == this.edges[0]) {
+      if (compareEdge(tile.edges[2], this.edges[0])) {
         this.up.push(i);
       }
       // RIGHT
-      if (tile.edges[3] == this.edges[1]) {
+      if (compareEdge(tile.edges[3], this.edges[1])) {
         this.right.push(i);
       }
       // DOWN
-      if (tile.edges[0] == this.edges[2]) {
+      if (compareEdge(tile.edges[0], this.edges[2])) {
         this.down.push(i);
       }
       // LEFT
-      if (tile.edges[1] == this.edges[3]) {
+      if (compareEdge(tile.edges[1], this.edges[3])) {
         this.left.push(i);
       }
     }
