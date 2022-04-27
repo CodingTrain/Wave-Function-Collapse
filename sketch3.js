@@ -3,7 +3,7 @@ const tileImages = [];
 
 let grid = [];
 
-const DIM = 10;
+const DIM = 30;
 
 function preload() {
   const path = "purple";
@@ -26,10 +26,10 @@ function setup() {
   tiles[7] = new Tile(tileImages[7], ["PPP", "PPP", "PPP", "PPP"]);
   tiles[8] = new Tile(tileImages[8], ["MPM", "MMM", "MPM", "MMM"]);
   tiles[9] = new Tile(tileImages[9], ["PMP", "PPP", "PMP", "PPP"]);
-  tiles[10] = new Tile(tileImages[10], ["MPM", "MPM", "MPM", "MPM"]);
-  tiles[11] = new Tile(tileImages[11], ["PMP", "PMP", "PMP", "PMP"]);
+  tiles[10] = new Tile(tileImages[10], ["PMP", "PMP", "PMP", "PMP"]);
+  tiles[11] = new Tile(tileImages[11], ["MPM", "MPM", "MPM", "MPM"]);
   tiles[12] = new Tile(tileImages[12], ["PMM", "MMM", "MMP", "PPP"]);
-  tiles[13] = new Tile(tileImages[13], ["MMP", "PPP", "PPM", "MMM"]);
+  tiles[13] = new Tile(tileImages[13], ["MPP", "PPP", "PPM", "MMM"]);
   //tiles[14] = new Tile(tileImages[14], ["MPM", "MPM", "MPM", "MPM"]);
   //tiles[15] = new Tile(tileImages[15], ["PMP", "PMP", "PMP", "PMP"]);
   // tiles[16] = new Tile(tileImages[16], ["MMP", "PMM", "MMP", "PMM"]);
