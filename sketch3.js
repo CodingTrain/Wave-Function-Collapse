@@ -6,8 +6,8 @@ let grid = [];
 const DIM = 30;
 
 function preload() {
-  const path = "purple";
-  for (let i = 0; i < 14; i++) {
+  const path = "large_tracks";
+  for (let i = 0; i < 8; i++) {
     tileImages[i] = loadImage(`${path}/${i}.png`);
   }
 }
@@ -16,26 +16,16 @@ function setup() {
   createCanvas(800, 800);
 
   // Loaded and created the tiles
-  tiles[0] = new Tile(tileImages[0], ["PPP", "PPP", "PPP", "PPP"]);
-  tiles[1] = new Tile(tileImages[1], ["MMM", "MMM", "MMM", "MMM"]);
-  tiles[2] = new Tile(tileImages[2], ["MMM", "PPP", "PPP", "MMM"]);
-  tiles[3] = new Tile(tileImages[3], ["PPP", "MMM", "MMM", "PPP"]);
-  tiles[4] = new Tile(tileImages[4], ["MMM", "PPP", "PPP", "PPP"]);
-  tiles[5] = new Tile(tileImages[5], ["PPP", "MMM", "MMM", "MMM"]);
-  tiles[6] = new Tile(tileImages[6], ["MMM", "MMM", "MMM", "MMM"]);
-  tiles[7] = new Tile(tileImages[7], ["PPP", "PPP", "PPP", "PPP"]);
-  tiles[8] = new Tile(tileImages[8], ["MPM", "MMM", "MPM", "MMM"]);
-  tiles[9] = new Tile(tileImages[9], ["PMP", "PPP", "PMP", "PPP"]);
-  tiles[10] = new Tile(tileImages[10], ["PMP", "PMP", "PMP", "PMP"]);
-  tiles[11] = new Tile(tileImages[11], ["MPM", "MPM", "MPM", "MPM"]);
-  tiles[12] = new Tile(tileImages[12], ["PMM", "MMM", "MMP", "PPP"]);
-  tiles[13] = new Tile(tileImages[13], ["MPP", "PPP", "PPM", "MMM"]);
-  //tiles[14] = new Tile(tileImages[14], ["MPM", "MPM", "MPM", "MPM"]);
-  //tiles[15] = new Tile(tileImages[15], ["PMP", "PMP", "PMP", "PMP"]);
-  // tiles[16] = new Tile(tileImages[16], ["MMP", "PMM", "MMP", "PMM"]);
-  // tiles[17] = new Tile(tileImages[17], ["PPM", "MPP", "PPM", "MPP"]);
-
-  for (let i = 2; i < 14; i++) {
+  tiles[0] = new Tile(tileImages[0], ["AA", "AA", "AA", "AA"]);
+  tiles[1] = new Tile(tileImages[1], ["CA", "AA", "AD", "PP"]);
+  tiles[2] = new Tile(tileImages[2], ["CA", "AC", "AA", "AA"]);
+  tiles[3] = new Tile(tileImages[3], ["AD", "EA", "AA", "AA"]);
+  tiles[4] = new Tile(tileImages[4], ["EA", "AA", "AF", "PP"]);
+  tiles[5] = new Tile(tileImages[5], ["EA", "AA", "AA", "AF"]);
+  tiles[6] = new Tile(tileImages[6], ["AF", "EA", "AA", "AA"]);
+  tiles[7] = new Tile(tileImages[7], ["CA", "AA", "AA", "AF"]);
+  
+  for (let i = 0; i < 8; i++) {
     for (let j = 1; j < 4; j++) {
       tiles.push(tiles[i].rotate(j));
     }
