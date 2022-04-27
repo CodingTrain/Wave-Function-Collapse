@@ -1,4 +1,4 @@
-const tiles = [];
+let tiles = [];
 const tileImages = [];
 
 let grid = [];
@@ -35,6 +35,10 @@ function setup() {
       tiles.push(tiles[i].rotate(j));
     }
   }
+  
+  // Rotations can create multiple identical tiles due to symmetry
+  // This is a performance optimization added after the fact
+  tiles = removeDuplicatedTiles(tiles);
 
   // tiles[2] = tiles[1].rotate(1);
   // tiles[3] = tiles[1].rotate(2);
@@ -47,6 +51,16 @@ function setup() {
   }
 
   startOver();
+}
+
+function removeDuplicatedTiles(tiles) {
+  const uniqueTilesMap = {};
+  for (const tile of tiles) {
+    // Tiles which have exactly the same edges are considered identical
+    const key = tile.edges.join(","); // example: "ABB,BCB,BBA,AAA"
+    uniqueTilesMap[key] = tile;
+  }
+  return Object.values(uniqueTilesMap);
 }
 
 function startOver() {
