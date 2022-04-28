@@ -58,7 +58,7 @@ float sdRoundedBox( vec2 uv, vec2 b, vec4 r) {
   return min( max(q.x, q.y), 0.0) + length(max(q, 0.0) ) - r.x;
 }
 
-vec3 sdTrack( vec2 uv, float r, vec3 col) {
+float sdTrack( vec2 uv, float r) {
   vec2 gv = uv;
   vec2 st = uv;
   vec2 md = uv;
@@ -106,7 +106,7 @@ vec3 sdTrack( vec2 uv, float r, vec3 col) {
   float m19 = S(.008, .0, s19);
   float m =  m1 + m2 + m3 + m4 + m5 + m6 + m7 + m8 + m9 + m10 
         + m11 + m12 + m13 + m14 + m15 + m16 + m17 + m18 + m19;
-  return m * col;
+  return m ;;
 }
 
 // Code for straight tracks
@@ -122,11 +122,13 @@ float biggerRails( vec2 uv, float x1, float x2 ) {
 // straight tracks
 // x = -.35 for side tracks
 float stracks( vec2 uv, float x) {
+  // comment out s1 and m1 to get crossed tracks
   float s1 = sdBox(uv - vec2(x, 0.), vec2(.16, .075));
   float m1 = S(.008, .0, s1);
   float s2 = sdBox(vec2(uv.x, abs(uv.y)) - vec2(x, .5), vec2(.16, .075));
   float m2 = S(.008, .0, s2);
   return m1 + m2;
+  //return m2;
 }
 
 // Code for curved rails
@@ -154,7 +156,6 @@ float sdCorner( vec2 uv) {
   vec2 gv = uv - vec2(-0., .0);
    float s1 =  abs(sdRoundedBox( uv - vec2(-.525, .975), vec2(.6, .7), vec4(.25, .25, .25, .25)) ) -  .04;
     float m1 = S(.008, .0, s1);
-    // float s2 =  abs(sdRoundedBox( gv - vec2(-.475, 1.01), vec2(.4, .6), vec4(.25, .15, .25, .35)) ) -  .04;
   float s2 =  abs(sdRoundedBox( gv - vec2(-.48, .66), vec2(.42, .25), vec4(.25, .15, .25, .45)) ) -  .04;
     float m2 = S(.008, .0, s2);
   return m1 + m2;
@@ -176,6 +177,8 @@ void main()
 	
     vec3 col = vec3(0);
   
+    //col += AQUA;  // blank tile
+  
     // Uncomment to check for symmetry
     float d1 = sdSegment(uv, vec2(-.5, 0.), vec2(.5, 0.));
     float s1 = S(.008, .0, d1); // horizontal center line
@@ -189,17 +192,23 @@ void main()
   // col += s1 + s2 + s3 + s4 ;
 
    // Smaller train tracks
-     vec3 t = sdTrack(uv, .001, RASPBERRY);
-     //col += t;
-  
+     float t = sdTrack(uv, .001);
+     
+     col += (1. - t) * AQUA + t * RASPBERRY;
+   
     // Bigger train tracks
     // x1 = -.42, x2=  -.275 for side tracks
     // x1 = -.075, x2=  .075 for side tracks
-    float b = biggerRails(uv, -0.42, -0.275);
+    float b = biggerRails(uv, -0.075, 0.075);
   
     // x = 0. for center tracks; -.35 for side tracks
-    float str = stracks(uv, -.35); 
-    //col += (1. - b - str) * AQUA + b * RASPBERRY + str*PURPLE ;
+    float str = stracks(uv, -.0); 
+    // col += (1. - b - str) * AQUA + b * RASPBERRY + str*PURPLE ;
+  
+    // Cross track
+    float br = biggerRails(Rot(PI*2./4.)*uv, -0.075, 0.075);
+    float strr = stracks(Rot(PI*2./4.)*uv, -.0); 
+    //col += (1. - b - br - str - strr) * AQUA + (b + br) * RASPBERRY + (str + strr)*PURPLE ;
   
     float bc = biggerCurvedRails(uv);
     float ctr = ctracks(uv); 
@@ -209,10 +218,7 @@ void main()
     // Connector tracks in corner
     float cn = sdCorner(uv);
     float cntr = corntracks(uv);
-    col += (1. - cn  - cntr) * AQUA + cn * RASPBERRY  + cntr * PURPLE;
-  
-      
-   //col += AQUA;
+    //col += (1. - cn  - cntr) * AQUA + cn * RASPBERRY  + cntr * PURPLE;
   
     gl_FragColor = vec4(col,1.0);
 }

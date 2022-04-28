@@ -3,11 +3,11 @@ const tileImages = [];
 
 let grid = [];
 
-const DIM = 12;
+const DIM = 10;
 
 function preload() {
   const path = "large_tracks";
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     tileImages[i] = loadImage(`${path}/${i}.png`);
   }
 }
@@ -21,8 +21,9 @@ function setup() {
   tiles[2] = new Tile(tileImages[2], ["BAA", "AAB", "AAA", "AAA"]);
   tiles[3] = new Tile(tileImages[3], ["BAA", "AAA", "AAB", "AAA"]);
   tiles[4] = new Tile(tileImages[4], ["ABA", "AAA", "AAA", "AAB"]);
-  
-  for (let i = 0; i < 5; i++) {
+  tiles[5] = new Tile(tileImages[5], ["ABA", "ABA", "ABA", "ABA"]);
+
+  for (let i = 0; i < 6; i++) {
     for (let j = 1; j < 4; j++) {
       tiles.push(tiles[i].rotate(j));
     }
