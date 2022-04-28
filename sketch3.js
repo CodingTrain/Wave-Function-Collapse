@@ -3,7 +3,7 @@ const tileImages = [];
 
 let grid = [];
 
-const DIM = 8;
+const DIM = 12;
 
 function preload() {
   const path = "large_tracks";
