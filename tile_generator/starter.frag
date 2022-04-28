@@ -1,4 +1,4 @@
-// Frag shader creates tiles for wave function collapse
+// Frag shader creates train tiles for wave function collapse
 
 #ifdef GL_ES
 precision mediump float;
@@ -8,17 +8,17 @@ precision mediump float;
 uniform vec2 u_resolution; 
 uniform float iTime;
 uniform vec2 iMouse;
-uniform float iFrame;
-//uniform sampler2D tex0;
+
 
 #define S smoothstep
 #define CG colorGradient
 #define PI 3.14159
-#define YELLOW vec3(252,236,82)/255.
-#define RASPBERRY vec3(230,40,179)/255.
-#define BLUE  vec3(49,133, 252)/255.
-#define GREEN vec3(75,198,185)/255.
-#define DARK vec3(64,63,76)/255.
+#define AQUA vec3(160,223,247)/255.
+#define RASPBERRY vec3(253,96,182)/255.
+#define PURPLE vec3(196,103,236)/255.
+#define ORANGE  vec3(255,160,78)/255.
+#define YELLOW vec3(254,241,9)/255.
+#define RED vec3(255,77, 28)/255.
 
 vec3 colorGradient(vec2 uv, vec3 col1, vec3 col2, float m) {
   float k = uv.y*m + m;
@@ -39,7 +39,7 @@ float sdSegment( vec2 uv, vec2 a, vec2 b) {
   return length( pa-ba*h );
 }
 
-// Shape functions from Inigo Quilez
+//From Inigo Quilez
 float sdBox( vec2 uv, vec2 b )
 {
     vec2 d = abs(uv)-b;
@@ -49,19 +49,6 @@ float sdBox( vec2 uv, vec2 b )
 float sdCircle( vec2 uv, float r) {
   return length(uv) - r;
 } 
-float ndot(vec2 a, vec2 b ) { return a.x*b.x - a.y*b.y; }
-float sdRhombus( vec2 uv, vec2 b ) 
-{
-    uv = abs(uv);
-    float h = clamp( ndot(b-2.0*uv,b)/dot(b,b), -1.0, 1.0 );
-    float d = length( uv-0.5*b*vec2(1.0-h,1.0+h) );
-    return d * sign( uv.x*b.y + uv.y*b.x - b.x*b.y );
-}
-
-
-float Arc( vec2 uv, float r1, float r2) {
-  return abs(sdCircle(uv, r1)) - r2;
-}
 
 // From Inigo Quilez
 float sdRoundedBox( vec2 uv, vec2 b, vec4 r) {
@@ -122,88 +109,65 @@ vec3 sdTrack( vec2 uv, float r, vec3 col) {
   return m * col;
 }
 
-float sdT( vec2 uv, float width) {
-  vec2 gv = uv * 8.;
-  float s1 = sdBox( gv - vec2(2., 0.), vec2(2.0, width) );
+// Code for straight tracks
+// x1 = -.42, x2=  -.275 for side tracks
+float biggerRails( vec2 uv, float x1, float x2 ) {
+  float s1 = sdBox(uv - vec2(x1, 0.), vec2(.04, 1.));
   float m1 = S(.008, .0, s1);
-  float s2 = sdBox(gv- vec2(0.,0.), vec2(width, 5.));
-  float m2 = S(.008, .0, s2);
-  return max(m1, m2);
+  float s2 = sdBox(uv - vec2(x2, 0.), vec2(.04, 1.));
+  float m2= S(.008, .0, s2);
+  return m1 + m2;
 }
 
-vec3 circleTile( vec2 uv, vec3 col1, vec3 col2, vec3 col3, float angle) {
-  vec2 gv = Rot(angle) * uv;
-  float s1 = Arc(gv - vec2(.5, 0.), .2, .025);
+// straight tracks
+// x = -.35 for side tracks
+float stracks( vec2 uv, float x) {
+  float s1 = sdBox(uv - vec2(x, 0.), vec2(.16, .075));
   float m1 = S(.008, .0, s1);
-  float s2 = Arc(gv - vec2(.5, 0.), .1, .025);
+  float s2 = sdBox(vec2(uv.x, abs(uv.y)) - vec2(x, .5), vec2(.16, .075));
   float m2 = S(.008, .0, s2);
-  float s3= sdCircle(gv - vec2(.5, 0.), .025);
-  float m3 = S(.008, .0, s3);
-  return m1* col1 + m2 * col2 + m3 * col3;
+  return m1 + m2;
+}
+
+// Code for curved rails
+// Tracks are separate functions to preserve color
+float biggerCurvedRails( vec2 uv) {
+   float s1 = abs(sdCircle(uv- vec2(.475, .475), .9)) - .04;
+   float m1 = S(.008, .0, s1);
+   float s2 = abs(sdCircle(uv- vec2(.475, .475), .75)) - .04;
+   float m2 = S(.008, .0, s2);
+   return m1 + m2;
+}
+
+// curved tracks
+float ctracks( vec2 uv) {
+   float s1 = sdBox(Rot(PI*1./4.)*uv - vec2(-.16, .0), vec2(.16, .075));
+   float m1 = S(.008, .0, s1);
+   float s2 = sdBox(uv - vec2(.5, -.345), vec2(.075, .16));
+   float m2 = S(.008, .0, s2);
+   float s3 = sdBox(uv - vec2(-.345, .5), vec2(.16, .075));
+   float m3 = S(.008, .0, s3);
+   return m1 + m2 + m3;
 }
 
 float sdCorner( vec2 uv) {
-  vec2 gv = uv * 8.;
-  float s1 = sdBox( gv - vec2(1.51, 0.), vec2(1.75, .24) );
-  float m1 = S(.008, .0, s1);
-  float s2 = sdBox(gv- vec2(0.,1.51), vec2(.24, 1.75));
-  float m2 = S(.008, .0, s2);
-  return max(m1, m2);
+  vec2 gv = uv - vec2(-0., .0);
+   float s1 =  abs(sdRoundedBox( uv - vec2(-.525, .975), vec2(.6, .7), vec4(.25, .25, .25, .25)) ) -  .04;
+    float m1 = S(.008, .0, s1);
+    // float s2 =  abs(sdRoundedBox( gv - vec2(-.475, 1.01), vec2(.4, .6), vec4(.25, .15, .25, .35)) ) -  .04;
+  float s2 =  abs(sdRoundedBox( gv - vec2(-.48, .66), vec2(.42, .25), vec4(.25, .15, .25, .45)) ) -  .04;
+    float m2 = S(.008, .0, s2);
+  return m1 + m2;
 }
 
-vec3 sdTile( vec2 uv, vec3 col1, vec3 col2, vec3 col3, float angle, float width) {
-   vec3 col = vec3(0);
-   vec2 gv = Rot(angle) * uv;
-   float m1 = sdT(gv, .25);
-   float m2 = sdCorner(vec2(gv.x, abs(gv.y)) - vec2(.1,.1));
-   float m3 = sdCorner(vec2(gv.x, abs(gv.y))- vec2(.2,.2));
-   vec2 st = Rot(angle + PI) * uv;
-   float s4 = sdBox(st - vec2(.1, .1), vec2(.025, .75));
-   float m4 = S(.008, .0, s4); 
-   float s5 = sdBox(st - vec2(.2, .2), vec2(.025, .75));
-   float m5 = S(.008, .0, s5);   
-   return col += m1*col1 + m2*col2 + m3*col3 + m4*col2 + m5*col3;
-}
-
-
-float opRhombus( vec2 uv, float r1, float r2) {
-  return abs( sdRhombus(uv, vec2(r1)) )- r2;
-}
-
-vec3 sdRhombusTile( vec2 uv, vec3 col1, vec3 col2, vec3 col3) {
-   
-   float s1 = opRhombus(uv, .13, .025); //center
-   float m1 = S(.008, .0, s1);
-   
-   float s2 = opRhombus(uv, .23, .025); // middle
-   float m2 = S(.008, .0, s2);  
-  
-   float s3 = opRhombus(uv, .33, .025); // outer
-   float m3 = S(.008, .0, s3);  
-   vec3 col = vec3(0);
-   return col += m1*col1 + m2*col2 + m3*col3;
-}
-
-vec3 sdStripes( vec2 uv, vec3 col1, vec3 col2, vec3 col3, float angle, float width) {
-   vec3 col = vec3(0);
-   vec2 gv = Rot(angle) * uv;
-   float s1 = sdBox(gv - vec2(.0, .0), vec2(.026, .75));  
-   float m1 = S(.008, .0, s1); // center
-   float s2 = sdBox(vec2(abs(gv.x), gv.y) - vec2(.1, .1), vec2(.026, .75));
-   float m2 = S(.008, .0, s2); // middle
-   float s3 = sdBox(vec2(abs(gv.x), gv.y) - vec2(.2, .2), vec2(.026, .75));
-   float m3 = S(.008, .0, s3);  // outer 
-   return col += m1*col1 + m2*col2 + m3*col3 ;
-}
-
-vec3 sdTexture( vec2 uv, float angle) {
-  vec3 texture = texture2D(tex0, uv.xy*.5+0.5).rgb;
-  vec2 gv = Rot(angle) * uv * 8.;
-  float s1 = sdBox( gv - vec2(2.5, 0.), vec2(2.5, .75) );
-  float m1 = S(.008, .0, s1);
-  float s2 = sdBox(gv- vec2(0.0,0.0), vec2(.75, 10.));
-  float m2 = S(.008, .0, s2);
-  return max(m1, m2)*texture;
+float corntracks( vec2 uv) {
+    float s1 = sdBox(uv - vec2(.0, .5), vec2(.16, .075));
+    float m1 = S(.008, .0, s1);
+    float s2 = sdBox(uv - vec2(-.5, .35), vec2(.075, .16));
+    float m2 = S(.008, .0, s2);
+    // float s3 = sdBox(uv - vec2(-.2, .4), vec2(.04, .16));
+    // float m3 = S(.008, .0, s3);
+    return m1 + m2 ;
 }
 
 void main()
@@ -212,56 +176,43 @@ void main()
 	
     vec3 col = vec3(0);
   
-    // Add background color -- BLANK
-    col += DARK; 
-  
     // Uncomment to check for symmetry
-    float d1 = sdSegment(uv, vec2(-.5, .0), vec2(0.5, .0));
+    float d1 = sdSegment(uv, vec2(-.5, 0.), vec2(.5, 0.));
     float s1 = S(.008, .0, d1); // horizontal center line
-    float d2 = sdSegment(uv, vec2(0., -.5), vec2(0., .5));
-    float s2 = S(.008, .0, d2); // vertical center line
-    //col += s1 + s2;
-  
-   // Rhombus at center, same options as BLANK
-   vec3 rhombus_tile = sdRhombusTile(uv, BLUE, RASPBERRY, GREEN);
-  // vec3 rhombus_tile = sdRhombusTile(uv, BLUE, BLUE, BLUE);
-   //col = max(col, rhombus_tile);
-  
-   // Change a (angle) to get Up, Down, Right, Left
-   // a = 0. vertical, a = 1. horizontal
-   float a = 0.; //  Right 0., Up  1., Left 2., Down 3. 
-  
-   // Create RIGHT, UP, LEFT, DOWN tiles
-   // vec3 tile  = sdTile(uv, BLUE, RASPBERRY, GREEN, PI* a/2., .25);
-   vec3 tile  = sdTile(uv, BLUE, BLUE, BLUE, PI* a/2., .25);
-   //col = max(tile, col); 
+    float d2 = sdSegment(uv, vec2(-.5/3., -.5), vec2(-.5/3., .5));
+    float s2 = S(.008, .0, d2); // vertical thirds line
+    float d3 = sdSegment(uv, vec2(.5/3., -.5), vec2(.5/3., .5));
+    float s3 = S(.008, .0, d3); // 
+    float d4 = sdSegment(uv, vec2(.0, -.5), vec2(.0, .5));
+     float s4 = S(.008, .0, d4); //  line
    
-    // Train tracks
-    vec2 gv = Rot(a)*uv;
-    vec3 t = sdTrack(gv, .001, BLUE);
-    col += t;
+  // col += s1 + s2 + s3 + s4 ;
+
+   // Smaller train tracks
+     vec3 t = sdTrack(uv, .001, RASPBERRY);
+     //col += t;
   
-   // Horizontal and Vertical Stripes
-   // vec3 vert_stripes  = sdStripes(uv, BLUE, RASPBERRY, GREEN, PI*a/2., .25);
-   // single color version
-   vec3 vert_stripes  = sdStripes(uv, BLUE, BLUE, BLUE, PI* a/2., .25);
-   //col = max(hor_stripes, col); 
-   //col = max(vert_stripes, col); 
+    // Bigger train tracks
+    // x1 = -.42, x2=  -.275 for side tracks
+    // x1 = -.075, x2=  .075 for side tracks
+    float b = biggerRails(uv, -0.42, -0.275);
   
-   // Cross with vertical and horizontal stripes
-   // vec3 hor_stripes = sdStripes(uv, BLUE, RASPBERRY, GREEN, PI*a/2., .25);
-   vec3 hor_stripes  = sdStripes(uv, BLUE, BLUE, BLUE, PI*a/2., .25);
-   
-   //col = max(max(vert_stripes,horizontal_stripes), col);
+    // x = 0. for center tracks; -.35 for side tracks
+    float str = stracks(uv, -.35); 
+    //col += (1. - b - str) * AQUA + b * RASPBERRY + str*PURPLE ;
   
-   // Pass a image to add texture (has to be fairly uniform)
-   vec3 texture = sdTexture(uv, 0.);
-   // col  =  max(texture, col);
+    float bc = biggerCurvedRails(uv);
+    float ctr = ctracks(uv); 
+    //col += (1. - bc - ctr) * AQUA + bc * RASPBERRY  + ctr*PURPLE;
   
-  // Half circles 
-  vec3 c = circleTile(uv, GREEN, RASPBERRY, BLUE, PI* a/2.);
-  // vec3 c = circleTile(uv, BLUE, BLUE, BLUE, PI* a/2.);
-  // col = max(c, col);
+  
+    // Connector tracks in corner
+    float cn = sdCorner(uv);
+    float cntr = corntracks(uv);
+    col += (1. - cn  - cntr) * AQUA + cn * RASPBERRY  + cntr * PURPLE;
+  
+      
+   //col += AQUA;
   
     gl_FragColor = vec4(col,1.0);
 }

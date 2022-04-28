@@ -3,11 +3,11 @@ const tileImages = [];
 
 let grid = [];
 
-const DIM = 30;
+const DIM = 8;
 
 function preload() {
   const path = "large_tracks";
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 5; i++) {
     tileImages[i] = loadImage(`${path}/${i}.png`);
   }
 }
@@ -16,16 +16,13 @@ function setup() {
   createCanvas(800, 800);
 
   // Loaded and created the tiles
-  tiles[0] = new Tile(tileImages[0], ["AA", "AA", "AA", "AA"]);
-  tiles[1] = new Tile(tileImages[1], ["CA", "AA", "AD", "PP"]);
-  tiles[2] = new Tile(tileImages[2], ["CA", "AC", "AA", "AA"]);
-  tiles[3] = new Tile(tileImages[3], ["AD", "EA", "AA", "AA"]);
-  tiles[4] = new Tile(tileImages[4], ["EA", "AA", "AF", "PP"]);
-  tiles[5] = new Tile(tileImages[5], ["EA", "AA", "AA", "AF"]);
-  tiles[6] = new Tile(tileImages[6], ["AF", "EA", "AA", "AA"]);
-  tiles[7] = new Tile(tileImages[7], ["CA", "AA", "AA", "AF"]);
+  tiles[0] = new Tile(tileImages[0], ["AAA", "AAA", "AAA", "AAA"]);
+  tiles[1] = new Tile(tileImages[1], ["ABA", "AAA", "ABA", "AAA"]);
+  tiles[2] = new Tile(tileImages[2], ["BAA", "AAB", "AAA", "AAA"]);
+  tiles[3] = new Tile(tileImages[3], ["BAA", "AAA", "AAB", "AAA"]);
+  tiles[4] = new Tile(tileImages[4], ["ABA", "AAA", "AAA", "AAB"]);
   
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 5; i++) {
     for (let j = 1; j < 4; j++) {
       tiles.push(tiles[i].rotate(j));
     }
