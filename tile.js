@@ -56,4 +56,13 @@ class Tile {
     }
     return new Tile(newImg, newEdges);
   }
+
+  static removeDuplicates(arrayOfTiles) {
+    const uniqueTilesMap = {};
+    for (const tile of arrayOfTiles) {
+      const key = tile.edges.join(","); // ex: "ABB,BCB,BBA,AAA"
+      uniqueTilesMap[key] = tile;
+    }
+    return Object.values(uniqueTilesMap);
+  }
 }
