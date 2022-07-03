@@ -1,7 +1,7 @@
 function reverseString(s) {
-  let arr = s.split("");
+  let arr = s.split('');
   arr = arr.reverse();
-  return arr.join("");
+  return arr.join('');
 }
 
 function compareEdge(a, b) {
@@ -9,18 +9,26 @@ function compareEdge(a, b) {
 }
 
 class Tile {
-  constructor(img, edges) {
+  constructor(img, edges, i) {
     this.img = img;
     this.edges = edges;
     this.up = [];
     this.right = [];
     this.down = [];
     this.left = [];
+
+    if (i !== undefined) {
+      this.index = i;
+    }
   }
 
   analyze(tiles) {
     for (let i = 0; i < tiles.length; i++) {
       let tile = tiles[i];
+
+      // Tile 5 can't match itself
+      if (tile.index == 5 && this.index == 5) continue;
+
       // UP
       if (compareEdge(tile.edges[2], this.edges[0])) {
         this.up.push(i);
@@ -54,6 +62,6 @@ class Tile {
     for (let i = 0; i < len; i++) {
       newEdges[i] = this.edges[(i - num + len) % len];
     }
-    return new Tile(newImg, newEdges);
+    return new Tile(newImg, newEdges, this.index);
   }
 }
