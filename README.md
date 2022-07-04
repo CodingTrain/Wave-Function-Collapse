@@ -2,12 +2,16 @@
 
 [WFC using local storage](https://editor.p5js.org/kfahn/full/iNUF-Lgdf)
 
-## Todo (section pull-requested by simon-tiger)
+## Completed
+- [x] Implementation of Tile Model (see: https://youtu.be/rI_y2GAlQFM)
 
-- [x] Basic algorithm
-- [x] Socket-based rules
+## Corrections
+- [ ] Additional Rules for tiles 4 and 5
+
+## Next Steps
+- [ ] Filter out redundant tiles
 - [ ] Recursive entropy reduction
 - [ ] Shannon entropy
-- [ ] Overlapping model
 
-On the video I've also posted a comment which has this list + me pointing some minor mistakes in the vid
+## Future work
+- [ ] Overlapping model
