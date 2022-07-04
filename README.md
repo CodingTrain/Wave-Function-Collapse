@@ -8,7 +8,7 @@
 ## Corrections
 - [ ] Additional Rules for tiles 4 and 5
 
-## Next Steps
+## Next Steps and Refactoring
 - [ ] Filter out redundant tiles
 - [ ] Recursive entropy reduction
 - [ ] Shannon entropy
