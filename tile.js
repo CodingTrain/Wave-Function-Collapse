@@ -27,7 +27,7 @@ class Tile {
       let tile = tiles[i];
 
       // Tile 5 can't match itself
-      if (tile.index == 5 && this.index == 5) continue;
+      // if (tile.index == 5 && this.index == 5) continue;
 
       // UP
       if (compareEdge(tile.edges[2], this.edges[0])) {

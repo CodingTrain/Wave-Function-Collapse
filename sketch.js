@@ -3,7 +3,7 @@ const tileImages = [];
 
 let grid = [];
 
-const DIM = 20;
+const DIM = 25;
 
 function preload() {
   // const path = 'rail';
@@ -27,7 +27,7 @@ function removeDuplicatedTiles(tiles) {
 }
 
 function setup() {
-  createCanvas(600, 600);
+  createCanvas(400, 400);
   //randomSeed(15);
 
   // tiles[0] = new Tile(tileImages[0], ['AAA', 'AAA', 'AAA', 'AAA']);
