@@ -17,6 +17,7 @@ Straight out of quantum mechanics, Wave Function Collapse is an algorithm for pr
 ### Corrections
 
 - [ ] Additional Rules for tiles 4 and 5
+- [ ] Explain how Computed Property Names could have been used (see: https://github.com/CodingTrain/Wave-Function-Collapse/issues/35)
 
 ### Next Steps and Refactoring
 
