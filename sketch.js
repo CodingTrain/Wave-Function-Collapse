@@ -1,7 +1,10 @@
 let tiles = [];
 const tileImages = [];
 
-let grid = [];
+/**
+ * @type {TileGrid}
+ */
+let grid;
 
 const DIM = 25;
 
@@ -12,14 +15,14 @@ function preload() {
   // }
 
   const path = 'tiles/circuit-coding-train';
-  for (let i = 0; i < 13; i++) {
+  for(let i = 0; i < 13; i++) {
     tileImages[i] = loadImage(`${path}/${i}.png`);
   }
 }
 
 function removeDuplicatedTiles(tiles) {
   const uniqueTilesMap = {};
-  for (const tile of tiles) {
+  for(const tile of tiles) {
     const key = tile.edges.join(','); // ex: "ABB,BCB,BBA,AAA"
     uniqueTilesMap[key] = tile;
   }
@@ -53,14 +56,14 @@ function setup() {
   tiles[11] = new Tile(tileImages[11], ['BCB', 'BCB', 'BBB', 'BBB']);
   tiles[12] = new Tile(tileImages[12], ['BBB', 'BCB', 'BBB', 'BCB']);
 
-  for (let i = 0; i < 12; i++) {
+  for(let i = 0; i < 12; i++) {
     tiles[i].index = i;
   }
 
   const initialTileCount = tiles.length;
-  for (let i = 0; i < initialTileCount; i++) {
+  for(let i = 0; i < initialTileCount; i++) {
     let tempTiles = [];
-    for (let j = 0; j < 4; j++) {
+    for(let j = 0; j < 4; j++) {
       tempTiles.push(tiles[i].rotate(j));
     }
     tempTiles = removeDuplicatedTiles(tempTiles);
@@ -69,7 +72,7 @@ function setup() {
   console.log(tiles.length);
 
   // Generate the adjacency rules based on edges
-  for (let i = 0; i < tiles.length; i++) {
+  for(let i = 0; i < tiles.length; i++) {
     const tile = tiles[i];
     tile.analyze(tiles);
   }
@@ -78,21 +81,20 @@ function setup() {
 }
 
 function startOver() {
-  // Create cell for each spot on the grid
-  for (let i = 0; i < DIM * DIM; i++) {
-    grid[i] = new Cell(tiles.length);
-  }
+  grid = new TileGrid(DIM, {
+    initializer: () => new Cell(tiles.length)
+  })
 }
 
 function checkValid(arr, valid) {
   //console.log(arr, valid);
-  for (let i = arr.length - 1; i >= 0; i--) {
+  for(let i = arr.length - 1; i >= 0; i--) {
     // VALID: [BLANK, RIGHT]
     // ARR: [BLANK, UP, RIGHT, DOWN, LEFT]
     // result in removing UP, DOWN, LEFT
     let element = arr[i];
     // console.log(element, valid.includes(element));
-    if (!valid.includes(element)) {
+    if(!valid.includes(element)) {
       arr.splice(i, 1);
     }
   }
@@ -109,10 +111,10 @@ function draw() {
 
   const w = width / DIM;
   const h = height / DIM;
-  for (let j = 0; j < DIM; j++) {
-    for (let i = 0; i < DIM; i++) {
+  for(let j = 0; j < DIM; j++) {
+    for(let i = 0; i < DIM; i++) {
       let cell = grid[i + j * DIM];
-      if (cell.collapsed) {
+      if(cell.collapsed) {
         let index = cell.options[0];
         image(tiles[index].img, i * w, j * h, w, h);
       } else {
@@ -129,7 +131,7 @@ function draw() {
   // console.table(grid);
   // console.table(gridCopy);
 
-  if (gridCopy.length == 0) {
+  if(gridCopy.length == 0) {
     return;
   }
   gridCopy.sort((a, b) => {
@@ -138,66 +140,79 @@ function draw() {
 
   let len = gridCopy[0].options.length;
   let stopIndex = 0;
-  for (let i = 1; i < gridCopy.length; i++) {
-    if (gridCopy[i].options.length > len) {
+  for(let i = 1; i < gridCopy.length; i++) {
+    if(gridCopy[i].options.length > len) {
       stopIndex = i;
       break;
     }
   }
 
-  if (stopIndex > 0) gridCopy.splice(stopIndex);
+  if(stopIndex > 0) gridCopy.splice(stopIndex);
   const cell = random(gridCopy);
   cell.collapsed = true;
   const pick = random(cell.options);
-  if (pick === undefined) {
+  if(pick === undefined) {
     startOver();
     return;
   }
   cell.options = [pick];
 
   const nextGrid = [];
-  for (let j = 0; j < DIM; j++) {
-    for (let i = 0; i < DIM; i++) {
+
+  grid.forEachPosition(pos => {
+    grid.forEachDirection(pos, (directedPosition, directionStr) => {
+      const directedCell = grid.getCellForPosition(directedPosition)
+      let validOptions = [];
+      for(let option of directedCell.options) {
+        let valid = tiles[option].down;
+        validOptions = validOptions.concat(valid);
+      }
+      checkValid(options, validOptions);
+    })
+  })
+
+  for(let j = 0; j < DIM; j++) {
+    for(let i = 0; i < DIM; i++) {
       let index = i + j * DIM;
-      if (grid[index].collapsed) {
+      if(grid[index].collapsed) {
         nextGrid[index] = grid[index];
       } else {
         let options = new Array(tiles.length).fill(0).map((x, i) => i);
         // Look up
-        if (j > 0) {
+        if(j > 0) {
           let up = grid[i + (j - 1) * DIM];
           let validOptions = [];
-          for (let option of up.options) {
+          for(let option of up.options) {
             let valid = tiles[option].down;
             validOptions = validOptions.concat(valid);
           }
           checkValid(options, validOptions);
         }
         // Look right
-        if (i < DIM - 1) {
+        if(i < DIM - 1) {
           let right = grid[i + 1 + j * DIM];
           let validOptions = [];
-          for (let option of right.options) {
+          for(let option of right.options) {
             let valid = tiles[option].left;
             validOptions = validOptions.concat(valid);
           }
           checkValid(options, validOptions);
         }
         // Look down
-        if (j < DIM - 1) {
+        if(j < DIM - 1) {
           let down = grid[i + (j + 1) * DIM];
           let validOptions = [];
-          for (let option of down.options) {
+          for(let option of down.options) {
             let valid = tiles[option].up;
             validOptions = validOptions.concat(valid);
           }
           checkValid(options, validOptions);
         }
         // Look left
-        if (i > 0) {
+        if(i > 0) {
           let left = grid[i - 1 + j * DIM];
           let validOptions = [];
-          for (let option of left.options) {
+          for(let option of left.options) {
             let valid = tiles[option].right;
             validOptions = validOptions.concat(valid);
           }
