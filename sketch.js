@@ -3,6 +3,7 @@ const tileImages = [];
 let grid = [];
 
 const DIM = 25;
+const NB_UPDATES_PER_TICK=5;
 
 function preload() {
   // const path = 'rail';
@@ -114,39 +115,41 @@ function draw() {
     }
   }
 
-  // Pick cell with least entropy
-  let gridCopy = grid.slice();
-  gridCopy = gridCopy.filter((a) => !a.collapsed);
-  // console.table(grid);
-  // console.table(gridCopy);
+  for (let idxUpdate = 0; idxUpdate < NB_UPDATES_PER_TICK; idxUpdate++) {
+    // Pick cell with least entropy
+    let gridCopy = grid.slice();
+    gridCopy = gridCopy.filter((a) => !a.collapsed);
+    // console.table(grid);
+    // console.table(gridCopy);
 
-  if (gridCopy.length == 0) {
-    return;
-  }
-  gridCopy.sort((a, b) => {
-    return a.options.length - b.options.length;
-  });
-
-  let len = gridCopy[0].options.length;
-  let stopIndex = 0;
-  for (let i = 1; i < gridCopy.length; i++) {
-    if (gridCopy[i].options.length > len) {
-      stopIndex = i;
-      break;
+    if (gridCopy.length == 0) {
+      return;
     }
-  }
+    gridCopy.sort((a, b) => {
+      return a.options.length - b.options.length;
+    });
 
-  if (stopIndex > 0) gridCopy.splice(stopIndex);
-  const cell = random(gridCopy);
-  cell.collapsed = true;
-  const pick = random(cell.options);
-  if (pick === undefined) {
-    startOver();
-    return;
-  }
-  cell.options = [pick];
+    let len = gridCopy[0].options.length;
+    let stopIndex = 0;
+    for (let i = 1; i < gridCopy.length; i++) {
+      if (gridCopy[i].options.length > len) {
+        stopIndex = i;
+        break;
+      }
+    }
 
-  grid = optimizedNextGrid(cell);
+    if (stopIndex > 0) gridCopy.splice(stopIndex);
+    const cell = random(gridCopy);
+    cell.collapsed = true;
+    const pick = random(cell.options);
+    if (pick === undefined) {
+      startOver();
+      return;
+    }
+    cell.options = [pick];
+
+    grid = optimizedNextGrid(cell);
+  }
 }
 
 // propagate options from src to dest. If dest is above src, dir == UP.
