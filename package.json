@@ -1,0 +1,25 @@
+{
+  "name": "wave-function-collapse",
+  "version": "1.0.0",
+  "description": "Wave Function Collapse",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DarkMortal/Wave-Function-Collapse.git"
+  },
+  "keywords": [
+    "Wave",
+    "Function",
+    "Collapse"
+  ],
+  "author": "Saptarshi Dey,The Coding Train contributors",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DarkMortal/Wave-Function-Collapse/issues"
+  },
+  "homepage": "https://github.com/DarkMortal/Wave-Function-Collapse#readme"
+}
