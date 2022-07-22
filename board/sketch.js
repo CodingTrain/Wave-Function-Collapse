@@ -2,7 +2,7 @@ let tiles = [];
 const tileImages = [];
 
 let grid = [];
-const DIM = 2*10-5;
+const DIM = 15;
 
 function preload() {
   const path = 'tiles/circuit';
