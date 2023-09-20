@@ -32,3 +32,4 @@ Straight out of quantum mechanics, Wave Function Collapse is an algorithm for pr
 ## Related work
 
 - [WFC using local storage](https://editor.p5js.org/kfahn/full/iNUF-Lgdf) by @kfahn22.
+- [Model Synthesis](https://paulmerrell.org/model-synthesis/) by Paul Merrell
