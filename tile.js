@@ -4,9 +4,14 @@ function reverseString(s) {
   return arr.join('');
 }
 
-function compareEdge(a, b) {
+function compatibleEdges(a, b) {
   return a == reverseString(b);
 }
+
+const UP = 0;
+const RIGHT = 1;
+const DOWN = 2;
+const LEFT = 3;
 
 class Tile {
   constructor(img, edges, i) {
@@ -30,21 +35,34 @@ class Tile {
       if (tile.index == 5 && this.index == 5) continue;
 
       // UP
-      if (compareEdge(tile.edges[2], this.edges[0])) {
+      if (compatibleEdges(tile.edges[DOWN], this.edges[UP])) {
         this.up.push(i);
       }
       // RIGHT
-      if (compareEdge(tile.edges[3], this.edges[1])) {
+      if (compatibleEdges(tile.edges[LEFT], this.edges[RIGHT])) {
         this.right.push(i);
       }
       // DOWN
-      if (compareEdge(tile.edges[0], this.edges[2])) {
+      if (compatibleEdges(tile.edges[UP], this.edges[DOWN])) {
         this.down.push(i);
       }
       // LEFT
-      if (compareEdge(tile.edges[1], this.edges[3])) {
+      if (compatibleEdges(tile.edges[RIGHT], this.edges[LEFT])) {
         this.left.push(i);
       }
+    }
+  }
+
+  compatibles(dir) {
+    switch (dir) {
+      case UP:
+        return this.up;
+      case RIGHT:
+        return this.right;
+      case DOWN:
+        return this.down;
+      case LEFT:
+        return this.left;
     }
   }
 
