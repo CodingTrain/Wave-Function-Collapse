@@ -109,11 +109,11 @@ function draw() {
           const neighbor = grid[nx + ny * DIM];
           if (neighbor.collapsed) {
             const nState = neighbor.options[0];
-            let tempValidOptions = [];
             let possibleOptions = options;
             if (validOptions.length > 0) {
               possibleOptions = validOptions;
             }
+            let tempValidOptions = [];
             for (const option of possibleOptions) {
               if (compareHEdge(tiles[option].img, tiles[nState].img, 2, 0)) {
                 tempValidOptions.push(option);
@@ -130,11 +130,11 @@ function draw() {
           const neighbor = grid[nx + ny * DIM];
           if (neighbor.collapsed) {
             const nState = neighbor.options[0];
-            let tempValidOptions = [];
             let possibleOptions = options;
             if (validOptions.length > 0) {
               possibleOptions = validOptions;
             }
+            let tempValidOptions = [];
             for (const option of possibleOptions) {
               if (compareVEdge(tiles[option].img, tiles[nState].img, 0, 2)) {
                 tempValidOptions.push(option);
@@ -151,11 +151,11 @@ function draw() {
           const neighbor = grid[nx + ny * DIM];
           if (neighbor.collapsed) {
             const nState = neighbor.options[0];
-            let tempValidOptions = [];
             let possibleOptions = options;
             if (validOptions.length > 0) {
               possibleOptions = validOptions;
             }
+            let tempValidOptions = [];
             for (const option of possibleOptions) {
               if (compareVEdge(tiles[option].img, tiles[nState].img, 2, 0)) {
                 tempValidOptions.push(option);
@@ -230,4 +230,7 @@ function render(pattern, x, y, w, h) {
       rect(x + (i * w) / tileSize, y + (j * h) / tileSize, w / tileSize, h / tileSize);
     }
   }
+  noFill();
+  stroke(255, 0, 0);
+  rect(x, y, w, h);
 }
