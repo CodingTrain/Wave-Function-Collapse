@@ -6,43 +6,91 @@ const DIM = 40;
 
 let toggle = false;
 
+let rotation = true;
+
 function preload() {
-  img = loadImage("flowers.png");
+  img = loadImage("samples/ColoredCity.png");
 }
 
 function setup() {
   createCanvas(400, 400);
   extractTiles(img);
   createAdjacency();
-  tiles = tiles.filter((tile) => {
-    return (
-      tile.bottom.length > 0 &&
-      tile.top.length > 0 &&
-      tile.left.length > 0 &&
-      tile.right.length > 0
-    );
-  });
+  textAlign(CENTER, CENTER);
+  textSize(20);
+
+  console.log(tiles.length);
   startOver();
+
+  // saveGif("wfc", 1601, {
+  //   units: "frames",
+  // });
+}
+
+function createTile(pixels, tileSize) {
+  let ih = new ImageHolder(pixels, tileSize, tileSize);
+  let dupe = tiles.find((t) => t.img.repr == ih.repr);
+  if (dupe) {
+    dupe.freq++;
+  } else {
+    tiles.push(new Tile(ih, tiles.length));
+  }
 }
 
 function extractTiles(img) {
   const w = img.width;
   const h = img.height;
 
-  for (let y = 0; y <= h - tileSize; y++) {
-    for (let x = 0; x <= w - tileSize; x++) {
+  let imgWrap = createImage(w * 2, h * 2);
+  imgWrap.copy(img, 0, 0, w, h, 0, 0, w, h);
+  imgWrap.copy(img, 0, 0, w, h, w, 0, w, h);
+  imgWrap.copy(img, 0, 0, w, h, 0, h, w, h);
+  imgWrap.copy(img, 0, 0, w, h, w, h, w, h);
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
       let pattern = createImage(tileSize, tileSize);
-      pattern.copy(img, x, y, tileSize, tileSize, 0, 0, tileSize, tileSize);
-      tiles.push(new Tile(pattern, tiles.length));
+      pattern.copy(imgWrap, x, y, tileSize, tileSize, 0, 0, tileSize, tileSize);
+      pattern.loadPixels();
+      createTile(pattern.pixels, tileSize);
+
+      // add rotations
+      if (rotation) {
+        let r1pixels = rotateMatrix(pattern.pixels, tileSize, tileSize, 1);
+        createTile(r1pixels, tileSize);
+
+        let r2pixels = rotateMatrix(pattern.pixels, tileSize, tileSize, 2);
+        createTile(r2pixels, tileSize);
+
+        let r3pixels = rotateMatrix(pattern.pixels, tileSize, tileSize, 3);
+        createTile(r3pixels, tileSize);
+      }
     }
   }
+}
+
+// credit: copilot
+function rotateMatrix(pixels, w, h, times) {
+  let newPixels = [];
+  for (let t = 0; t < times; t++) {
+    for (let i = 0; i < w; i++) {
+      for (let j = 0; j < h; j++) {
+        let index = (i + j * w) * 4;
+        let newIndex = (w - j - 1 + i * w) * 4;
+        newPixels[newIndex + 0] = pixels[index + 0];
+        newPixels[newIndex + 1] = pixels[index + 1];
+        newPixels[newIndex + 2] = pixels[index + 2];
+        newPixels[newIndex + 3] = pixels[index + 3];
+      }
+    }
+    pixels = newPixels.slice();
+  }
+  return newPixels;
 }
 
 function createAdjacency() {
   for (const tileA of tiles) {
     for (const tileB of tiles) {
-      tileA.img.loadPixels();
-      tileB.img.loadPixels();
       if (compareHEdge(tileA.img, tileB.img, 1, 0)) {
         tileA.right.push(tileB);
         tileB.left.push(tileA);
@@ -54,77 +102,70 @@ function createAdjacency() {
     }
   }
 }
-
 function startOver() {
+  let seed = Math.floor(random(100000));
+  // let seed = 45962;
+  randomSeed(seed);
+  console.log("Seed: " + seed);
   for (let i = 0; i < DIM * DIM; i++) {
     grid[i] = new Cell(tiles.length);
   }
 }
-
+let index = 0;
 function draw() {
   // draw all the extracted tiles
   background(0);
   // showAllTiles();
-
-  // performance.mark("start");
+  // for (let i = 0; i < 3; i++)
   wfc();
-  // performance.mark("end");
-  // console.log(performance.measure("wfc", "start", "end"));
 
-  // let t = random(tiles);
-  // let w = 20;
-  // renderTile(t.img, 0, 0, w, w);
+  // let someTile = tiles[index];
+  // let w = width / 10;
 
-  // // compare t to all other tiles right horizontal edge
-  // let x = w;
-  // let y = 0;
-  // for (let i = 0; i < tiles.length; i++) {
-  //   let other = tiles[i];
-  //   if (compareVEdge(t.img, other.img, 1, 0)) {
-  //     renderTile(other.img, x, y, w, w);
-  //     y += w;
-  //     if (y > height) {
-  //       y = 0;
-  //       x += w;
-  //     }
-  //   }
+  // renderTile(someTile.img, 0, 0, w, w, index);
+
+  // let right = someTile.right;
+  // for (let i = 0; i < right.length; i++) {
+  //   let x = i % 10;
+  //   let y = Math.floor(i / 10) + 2;
+  //   renderTile(right[i].img, x * w, y * w, w, w, tiles.indexOf(right[i]));
+  // }
+
+  // let left = someTile.left;
+  // for (let i = 0; i < left.length; i++) {
+  //   let x = i % 10;
+  //   let y = Math.floor(i / 10) + 4;
+  //   renderTile(left[i].img, x * w, y * w, w, w, tiles.indexOf(left[i]));
+  // }
+
+  // let top = someTile.top;
+  // for (let i = 0; i < top.length; i++) {
+  //   let x = i % 10;
+  //   let y = Math.floor(i / 10) + 6;
+  //   renderTile(top[i].img, x * w, y * w, w, w, tiles.indexOf(top[i]));
+  // }
+
+  // let bottom = someTile.bottom;
+  // for (let i = 0; i < bottom.length; i++) {
+  //   let x = i % 10;
+  //   let y = Math.floor(i / 10) + 8;
+  //   renderTile(bottom[i].img, x * w, y * w, w, w, tiles.indexOf(bottom[i]));
+  // }
+
+  // let num = Math.floor(width / 40);
+  // console.log(tiles);
+  // for (let i = 0; i < 100; i++) {
+  //   let x = i % num;
+  //   let y = Math.floor(i / num);
+  //   renderTile(tiles[i].img, x * 40, y * 40, 40, 40, i);
   // }
 
   // noLoop();
 }
 
-function showAllTiles() {
-  let x = 0;
-  let y = 0;
-  const w = width / DIM;
-  const h = height / DIM;
-
-  for (let i = 0; i < tiles.length; i++) {
-    render(tiles[i].img, x, y, w, h);
-    x += w;
-    if (x > width) {
-      x = 0;
-      y += h;
-    }
-  }
-
-  translate(0, height / 2);
-  // draw the original image with each pixel w,h
-  img.loadPixels();
-  let pw = w / 3;
-  let ph = h / 3;
-
-  for (let i = 0; i < img.width; i++) {
-    for (let j = 0; j < img.height; j++) {
-      let index = (i + j * img.width) * 4;
-      const r = img.pixels[index + 0];
-      const g = img.pixels[index + 1];
-      const b = img.pixels[index + 2];
-      fill(r, g, b);
-      noStroke();
-      rect(i * pw, j * ph, pw, ph);
-    }
-  }
+function mousePressed() {
+  index = (index + 1) % tiles.length;
+  redraw();
 }
 
 function wfc() {
@@ -149,6 +190,7 @@ function wfc() {
       //   rect(i * w, j * h, w, h);
       // }.
       // if (cell.options.length == 1)
+      // if (cell.collapsed)
       renderCenter(
         cell.options.map((index) => tiles[index].img),
         i * w,
@@ -159,25 +201,25 @@ function wfc() {
     }
   }
 
-  // // Pick cell with least entropy
+  // // // Pick cell with least entropy
   let gridCopy = grid.slice();
   gridCopy = gridCopy.filter((a) => !a.collapsed);
   if (gridCopy.length == 0) {
     noLoop();
+    console.log("Took " + frameCount + " frames");
     return;
   }
   gridCopy.sort((a, b) => {
-    return a.options.length - b.options.length;
+    return a.entropy() - b.entropy();
   });
 
-  gridCopy = gridCopy.filter(
-    (a) => a.options.length == gridCopy[0].options.length
-  );
+  gridCopy = gridCopy.filter((a) => a.entropy() == gridCopy[0].entropy());
 
   const cell = random(gridCopy);
   cell.collapsed = true;
   cell.checked = true;
-  const pick = random(cell.options);
+  const pick = weightedRandom(cell.options);
+
   // if (pick === undefined) {
   //   startOver();
   //   // noLoop();
@@ -186,16 +228,17 @@ function wfc() {
   cell.options = [pick];
 
   breakLoop = false;
-  checkNeighbors([cell]);
+  checkNeighbors(cell);
 }
 
 let breakLoop = false;
-function checkNeighbors(queue, depth = Infinity) {
+function checkNeighbors(cell, depth = Infinity) {
   if (depth == 0) return;
-  if (queue.length == 0) return;
-  if (grid.every((cell) => cell.checked || cell.collapsed)) return;
+  // if (queue.length == 0) return;
+  if (grid.every((cell) => cell.checked)) return;
   if (breakLoop) return;
-  const cell = queue.pop();
+  // const cell = queue.pop();
+  let toCheck = [];
 
   let right = getRight(cell);
   if (right && !right.collapsed && !right.checked) {
@@ -205,11 +248,12 @@ function checkNeighbors(queue, depth = Infinity) {
     right.options = right.options.filter((a) => possibleChoices.has(tiles[a]));
     right.checked = true;
 
-    if (right.options.length == 1) {
-      right.collapsed = true;
-    }
+    // if (right.options.length == 1) {
+    //   right.collapsed = true;
+    // }
 
-    queue.push(right);
+    // queue.push(right);
+    toCheck.push(right);
 
     if (right.options.length == 0) {
       console.log("Contradiction - right");
@@ -224,11 +268,12 @@ function checkNeighbors(queue, depth = Infinity) {
     left.options = left.options.filter((a) => possibleChoices.has(tiles[a]));
     left.checked = true;
 
-    if (left.options.length == 1) {
-      left.collapsed = true;
-    }
+    // if (left.options.length == 1) {
+    //   left.collapsed = true;
+    // }
 
-    queue.push(left);
+    // queue.push(left);
+    toCheck.push(left);
 
     if (left.options.length == 0) {
       console.log("Contradiction - left");
@@ -243,11 +288,12 @@ function checkNeighbors(queue, depth = Infinity) {
     up.options = up.options.filter((a) => possibleChoices.has(tiles[a]));
     up.checked = true;
 
-    if (up.options.length == 1) {
-      up.collapsed = true;
-    }
+    // if (up.options.length == 1) {
+    //   up.collapsed = true;
+    // }
 
-    queue.push(up);
+    // queue.push(up);
+    toCheck.push(up);
 
     if (up.options.length == 0) {
       console.log("Contradiction - up");
@@ -262,11 +308,12 @@ function checkNeighbors(queue, depth = Infinity) {
     down.options = down.options.filter((a) => possibleChoices.has(tiles[a]));
     down.checked = true;
 
-    if (down.options.length == 1) {
-      down.collapsed = true;
-    }
+    // if (down.options.length == 1) {
+    //   down.collapsed = true;
+    // }
 
-    queue.push(down);
+    // queue.push(down);
+    toCheck.push(down);
 
     if (down.options.length == 0) {
       console.log("Contradiction - down");
@@ -287,12 +334,11 @@ function checkNeighbors(queue, depth = Infinity) {
     return;
   }
 
-  checkNeighbors(queue, depth - 1);
+  toCheck.forEach((cell) => checkNeighbors(cell, depth - 1));
+  // checkNeighbors(queue, depth - 1);
 }
 
 function compareHEdge(a, b, aEdge, bEdge) {
-  a.loadPixels();
-  b.loadPixels();
   let same = true;
 
   for (j = 0; j < 2; j++) {
@@ -317,8 +363,6 @@ function compareHEdge(a, b, aEdge, bEdge) {
 }
 
 function compareVEdge(a, b, aEdge, bEdge) {
-  a.loadPixels();
-  b.loadPixels();
   let same = true;
   for (j = 0; j < 2; j++) {
     for (let i = 0; i < tileSize; i++) {
@@ -370,7 +414,11 @@ function renderCenter(patterns, x, y, w, h) {
   // rect(x, y, w, h);
 }
 
-function renderTile(pattern, x, y, w, h) {
+function renderTile(pattern, x, y, w, h, i) {
+  stroke(0);
+  strokeWeight(3);
+  noFill();
+  rect(x, y, w, h);
   for (let i = 0; i < tileSize; i++) {
     for (let j = 0; j < tileSize; j++) {
       let index = (i + j * tileSize) * 4;
@@ -387,6 +435,9 @@ function renderTile(pattern, x, y, w, h) {
       );
     }
   }
+  fill(0);
+
+  text(i, x, y, w, h);
   // noFill();
   // stroke(255, 0, 0);
   // rect(x, y, w, h);
@@ -403,7 +454,9 @@ function getRight(cell) {
       }
     }
   }
-  if (nx < 0 || nx >= DIM || ny < 0 || ny >= DIM) return null;
+  // if (nx < 0 || nx >= DIM || ny < 0 || ny >= DIM) return null;
+  nx = (nx + DIM) % DIM;
+  ny = (ny + DIM) % DIM;
   return grid[nx + ny * DIM];
 }
 
@@ -418,7 +471,9 @@ function getLeft(cell) {
       }
     }
   }
-  if (nx < 0 || nx >= DIM || ny < 0 || ny >= DIM) return null;
+  // if (nx < 0 || nx >= DIM || ny < 0 || ny >= DIM) return null;.
+  nx = (nx + DIM) % DIM;
+  ny = (ny + DIM) % DIM;
   return grid[nx + ny * DIM];
 }
 
@@ -433,7 +488,9 @@ function getUp(cell) {
       }
     }
   }
-  if (nx < 0 || nx >= DIM || ny < 0 || ny >= DIM) return null;
+  // if (nx < 0 || nx >= DIM || ny < 0 || ny >= DIM) return null;
+  nx = (nx + DIM) % DIM;
+  ny = (ny + DIM) % DIM;
   return grid[nx + ny * DIM];
 }
 
@@ -448,6 +505,21 @@ function getDown(cell) {
       }
     }
   }
-  if (nx < 0 || nx >= DIM || ny < 0 || ny >= DIM) return null;
+  // if (nx < 0 || nx >= DIM || ny < 0 || ny >= DIM) return null;
+  nx = (nx + DIM) % DIM;
+  ny = (ny + DIM) % DIM;
   return grid[nx + ny * DIM];
+}
+
+function weightedRandom(options) {
+  const currTiles = options.map((i) => tiles[i]);
+  const sum = currTiles.map((t) => t.freq).reduce((a, b) => a + b, 0);
+  const rand = random(sum);
+  let total = 0;
+  for (let i = 0; i < currTiles.length; i++) {
+    total += currTiles[i].freq;
+    if (rand < total) {
+      return options[i];
+    }
+  }
 }
