@@ -1,6 +1,7 @@
 class Cell {
-  constructor(value) {
+  constructor(value, index) {
     this.collapsed = false;
+    this.index = index;
     if (value instanceof Array) {
       this.options = value;
     } else {
