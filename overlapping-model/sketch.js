@@ -84,7 +84,7 @@ function draw() {
           renderCenter(tiles[index].img, i * w, j * h, w, h);
         }
       } else {
-        noFill();
+        fill(255, 100);
         stroke(51);
         rect(i * w, j * h, w, h);
         //let txt = cell.options.join(' ');
@@ -141,8 +141,6 @@ function reduce(cell, tiles) {
       for (let i of cell.options) {
         validOptions = validOptions.concat(tiles[i].adjacents[RIGHT]);
       }
-      console.log(rightCell.options);
-      console.log(validOptions);
       // only validOptions that are already in rightCell.options can stay
       rightCell.options = rightCell.options.filter((x) => validOptions.includes(x));
       console.log(rightCell.options);
