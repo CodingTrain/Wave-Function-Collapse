@@ -2,7 +2,9 @@ let img;
 let tiles = [];
 let grid = [];
 const tileSize = 3;
-const DIM = 40;
+const DIM = 80;
+
+const recursion_depth = 5;
 
 let toggle = false;
 
@@ -12,7 +14,7 @@ const UP = 2;
 const DOWN = 3;
 
 function preload() {
-  img = loadImage('flowers.png');
+  img = loadImage('water.png');
 }
 
 function setup() {
@@ -83,14 +85,27 @@ function draw() {
           renderCenter(tiles[index].img, i * w, j * h, w, h);
         }
       } else {
-        fill(255, 100);
-        stroke(51);
-        rect(i * w, j * h, w, h);
-        let txt = cell.options.length;
-        fill(255);
+        let rSum = 0;
+        let gSum = 0;
+        let bSum = 0;
+        for (let i = 0; i < cell.options.length; i++) {
+          let tileIndex = cell.options[i];
+          let tile = tiles[tileIndex];
+          // center pixel
+          let x = floor(tileSize / 2);
+          let y = floor(tileSize / 2);
+          let index = (x + y * tileSize) * 4;
+          rSum += tile.img.pixels[index + 0];
+          gSum += tile.img.pixels[index + 1];
+          bSum += tile.img.pixels[index + 2];
+        }
+        rSum /= cell.options.length;
+        gSum /= cell.options.length;
+        bSum /= cell.options.length;
+        fill(rSum, gSum, bSum);
         noStroke();
-        textSize(w / 2);
-        text(txt, i * w + 2, j * h, w, h);
+        rect(i * w, j * h, w, h);
+
         if (cell.options.length == 0) {
           fill(255, 0, 0, 100);
           noStroke();
@@ -128,7 +143,7 @@ function reduce(cell, tiles, depth = 0) {
   if (cell.checked) return;
   cell.checked = true;
 
-  if (depth > 10) return;
+  if (depth > recursion_depth) return;
 
   const x = cell.index % DIM;
   const y = floor(cell.index / DIM);
@@ -219,7 +234,7 @@ function wfc() {
 }
 
 function renderCenter(pattern, x, y, w, h) {
-  pattern.loadPixels();
+  // pattern.loadPixels();
   // hardcoding center pixel
   let i = 1;
   let j = 1;
@@ -233,7 +248,7 @@ function renderCenter(pattern, x, y, w, h) {
 }
 
 function renderTile(pattern, x, y, w, h) {
-  pattern.loadPixels();
+  // pattern.loadPixels();
   for (let i = 0; i < tileSize; i++) {
     for (let j = 0; j < tileSize; j++) {
       let index = (i + j * tileSize) * 4;
@@ -245,7 +260,7 @@ function renderTile(pattern, x, y, w, h) {
       rect(x + (i * w) / tileSize, y + (j * h) / tileSize, w / tileSize, h / tileSize);
     }
   }
-  stroke(255, 0, 0);
-  noFill();
-  rect(x, y, w, h);
+  // stroke(255, 0, 0);
+  // noFill();
+  // rect(x, y, w, h);
 }
