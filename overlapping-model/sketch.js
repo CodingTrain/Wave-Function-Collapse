@@ -2,7 +2,7 @@ let img;
 let tiles = [];
 let grid = [];
 const tileSize = 3;
-const DIM = 80;
+const DIM = 40;
 
 const recursion_depth = 5;
 
