@@ -2,7 +2,7 @@ let img;
 let tiles = [];
 let grid = [];
 const tileSize = 3;
-const DIM = 20;
+const DIM = 40;
 
 let toggle = false;
 
@@ -12,12 +12,11 @@ const UP = 2;
 const DOWN = 3;
 
 function preload() {
-  img = loadImage('water.png');
+  img = loadImage('flowers.png');
 }
 
 function setup() {
   createCanvas(400, 400);
-  randomSeed(1);
   extractTiles(img);
   for (let t of tiles) {
     t.adjacancies(tiles);
@@ -76,7 +75,6 @@ function draw() {
     for (let i = 0; i < DIM; i++) {
       let cell = grid[i + j * DIM];
       cell.checked = false;
-
       if (cell.collapsed) {
         let index = cell.options[0];
         if (mouseIsPressed) {
@@ -88,11 +86,7 @@ function draw() {
         fill(255, 100);
         stroke(51);
         rect(i * w, j * h, w, h);
-        //let txt = cell.options.join(' ');
         let txt = cell.options.length;
-        if (txt.length == 0) {
-          console.log('No options left!');
-        }
         fill(255);
         noStroke();
         textSize(w / 2);
@@ -130,11 +124,14 @@ function showAllTiles() {
 //   redraw();
 // }
 
-function reduce(cell, tiles) {
-  const x = cell.index % DIM;
-  const y = floor(cell.index / DIM);
+function reduce(cell, tiles, depth = 0) {
   if (cell.checked) return;
   cell.checked = true;
+
+  if (depth > 10) return;
+
+  const x = cell.index % DIM;
+  const y = floor(cell.index / DIM);
 
   // RIGHT
   if (x + 1 < DIM) {
@@ -146,7 +143,7 @@ function reduce(cell, tiles) {
       }
       // only validOptions that are already in rightCell.options can stay
       rightCell.options = rightCell.options.filter((x) => validOptions.includes(x));
-      reduce(rightCell, tiles);
+      reduce(rightCell, tiles, depth + 1);
     }
   }
 
@@ -160,7 +157,7 @@ function reduce(cell, tiles) {
       }
       // only validOptions that are already in leftCell.options can stay
       leftCell.options = leftCell.options.filter((x) => validOptions.includes(x));
-      reduce(leftCell, tiles);
+      reduce(leftCell, tiles, depth + 1);
     }
   }
 
@@ -174,7 +171,7 @@ function reduce(cell, tiles) {
       }
       // only validOptions that are already in upCell.options can stay
       upCell.options = upCell.options.filter((x) => validOptions.includes(x));
-      reduce(upCell, tiles);
+      reduce(upCell, tiles, depth + 1);
     }
   }
 
@@ -188,7 +185,7 @@ function reduce(cell, tiles) {
       }
       // only validOptions that are already in downCell.options can stay
       downCell.options = downCell.options.filter((x) => validOptions.includes(x));
-      reduce(downCell, tiles);
+      reduce(downCell, tiles, depth + 1);
     }
   }
 }
@@ -217,16 +214,8 @@ function wfc() {
   const cell = random(gridCopy);
   cell.collapsed = true;
   const pick = random(cell.options);
-  // if (pick === undefined) {
-  //   // startOver();
-  //   noLoop();
-  //   return;
-  // }
   cell.options = [pick];
-  // Propogate restrictions
   reduce(cell, tiles);
-
-  // noLoop();
 }
 
 function renderCenter(pattern, x, y, w, h) {
