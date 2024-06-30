@@ -75,6 +75,7 @@ function draw() {
   for (let j = 0; j < DIM; j++) {
     for (let i = 0; i < DIM; i++) {
       let cell = grid[i + j * DIM];
+      cell.checked = false;
 
       if (cell.collapsed) {
         let index = cell.options[0];
@@ -132,6 +133,8 @@ function showAllTiles() {
 function reduce(cell, tiles) {
   const x = cell.index % DIM;
   const y = floor(cell.index / DIM);
+  if (cell.checked) return;
+  cell.checked = true;
 
   // RIGHT
   if (x + 1 < DIM) {
@@ -143,13 +146,8 @@ function reduce(cell, tiles) {
       }
       // only validOptions that are already in rightCell.options can stay
       rightCell.options = rightCell.options.filter((x) => validOptions.includes(x));
-      console.log(rightCell.options);
+      reduce(rightCell, tiles);
     }
-
-    if (rightCell.options[0] == undefined) {
-      console.log('no right options');
-    }
-    // reduce(rightCell, tiles);
   }
 
   // LEFT
@@ -162,11 +160,8 @@ function reduce(cell, tiles) {
       }
       // only validOptions that are already in leftCell.options can stay
       leftCell.options = leftCell.options.filter((x) => validOptions.includes(x));
+      reduce(leftCell, tiles);
     }
-    if (leftCell.options[0] == undefined) {
-      console.log('no left options');
-    }
-    // reduce(leftCell, tiles);
   }
 
   // UP
@@ -179,8 +174,8 @@ function reduce(cell, tiles) {
       }
       // only validOptions that are already in upCell.options can stay
       upCell.options = upCell.options.filter((x) => validOptions.includes(x));
+      reduce(upCell, tiles);
     }
-    // reduce(upCell, tiles);
   }
 
   // DOWN
@@ -193,8 +188,8 @@ function reduce(cell, tiles) {
       }
       // only validOptions that are already in downCell.options can stay
       downCell.options = downCell.options.filter((x) => validOptions.includes(x));
+      reduce(downCell, tiles);
     }
-    // reduce(downCell, tiles);
   }
 }
 
@@ -261,4 +256,7 @@ function renderTile(pattern, x, y, w, h) {
       rect(x + (i * w) / tileSize, y + (j * h) / tileSize, w / tileSize, h / tileSize);
     }
   }
+  stroke(255, 0, 0);
+  noFill();
+  rect(x, y, w, h);
 }
