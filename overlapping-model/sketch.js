@@ -12,11 +12,12 @@ const UP = 2;
 const DOWN = 3;
 
 function preload() {
-  img = loadImage('example.png');
+  img = loadImage('water.png');
 }
 
 function setup() {
   createCanvas(400, 400);
+  randomSeed(1);
   extractTiles(img);
   for (let t of tiles) {
     t.adjacancies(tiles);
@@ -67,7 +68,45 @@ function draw() {
   // frameRate(1);
   // draw all the extracted tiles
   background(0);
+
+  // draw everything
+  const w = width / DIM;
+  const h = height / DIM;
+  for (let j = 0; j < DIM; j++) {
+    for (let i = 0; i < DIM; i++) {
+      let cell = grid[i + j * DIM];
+
+      if (cell.collapsed) {
+        let index = cell.options[0];
+        if (mouseIsPressed) {
+          renderTile(tiles[index].img, i * w, j * h, w, h);
+        } else {
+          renderCenter(tiles[index].img, i * w, j * h, w, h);
+        }
+      } else {
+        noFill();
+        stroke(51);
+        rect(i * w, j * h, w, h);
+        //let txt = cell.options.join(' ');
+        let txt = cell.options.length;
+        if (txt.length == 0) {
+          console.log('No options left!');
+        }
+        fill(255);
+        noStroke();
+        textSize(w / 2);
+        text(txt, i * w + 2, j * h, w, h);
+        if (cell.options.length == 0) {
+          fill(255, 0, 0, 100);
+          noStroke();
+          rect(i * w, j * h, w, h);
+        }
+      }
+    }
+  }
+
   wfc();
+
   // showAllTiles();
   // renderTile(tiles[0].img, 0, 100, width / DIM, height / DIM);
 }
@@ -93,6 +132,7 @@ function showAllTiles() {
 function reduce(cell, tiles) {
   const x = cell.index % DIM;
   const y = floor(cell.index / DIM);
+
   // RIGHT
   if (x + 1 < DIM) {
     let rightCell = grid[x + 1 + y * DIM];
@@ -101,8 +141,15 @@ function reduce(cell, tiles) {
       for (let i of cell.options) {
         validOptions = validOptions.concat(tiles[i].adjacents[RIGHT]);
       }
+      console.log(rightCell.options);
+      console.log(validOptions);
       // only validOptions that are already in rightCell.options can stay
       rightCell.options = rightCell.options.filter((x) => validOptions.includes(x));
+      console.log(rightCell.options);
+    }
+
+    if (rightCell.options[0] == undefined) {
+      console.log('no right options');
     }
     // reduce(rightCell, tiles);
   }
@@ -117,6 +164,9 @@ function reduce(cell, tiles) {
       }
       // only validOptions that are already in leftCell.options can stay
       leftCell.options = leftCell.options.filter((x) => validOptions.includes(x));
+    }
+    if (leftCell.options[0] == undefined) {
+      console.log('no left options');
     }
     // reduce(leftCell, tiles);
   }
@@ -151,31 +201,6 @@ function reduce(cell, tiles) {
 }
 
 function wfc() {
-  const w = width / DIM;
-  const h = height / DIM;
-  for (let j = 0; j < DIM; j++) {
-    for (let i = 0; i < DIM; i++) {
-      let cell = grid[i + j * DIM];
-      if (cell.collapsed) {
-        let index = cell.options[0];
-        if (mouseIsPressed) {
-          renderTile(tiles[index].img, i * w, j * h, w, h);
-        } else {
-          renderCenter(tiles[index].img, i * w, j * h, w, h);
-        }
-      } else {
-        noFill();
-        stroke(51);
-        rect(i * w, j * h, w, h);
-        let txt = cell.options.join(' ');
-
-        fill(255);
-        noStroke();
-        textSize(4);
-        text(txt, i * w + 2, j * h, w, h);
-      }
-    }
-  }
   // Pick cell with least entropy
   let gridCopy = grid.slice();
   gridCopy = gridCopy.filter((a) => !a.collapsed);
