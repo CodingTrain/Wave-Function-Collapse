@@ -99,7 +99,6 @@ function reduce(cell, tiles) {
     if (rightCell !== undefined && !rightCell.collapsed) {
       let validOptions = [];
       for (let i of cell.options) {
-        //console.log(i);
         validOptions = validOptions.concat(tiles[i].adjacents[RIGHT]);
       }
       // only validOptions that are already in rightCell.options can stay
@@ -116,7 +115,7 @@ function reduce(cell, tiles) {
       for (let i of cell.options) {
         validOptions = validOptions.concat(tiles[i].adjacents[LEFT]);
       }
-      // only validOptions that are already in rightCell.options can stay
+      // only validOptions that are already in leftCell.options can stay
       leftCell.options = leftCell.options.filter((x) => validOptions.includes(x));
     }
     // reduce(leftCell, tiles);
@@ -130,7 +129,7 @@ function reduce(cell, tiles) {
       for (let i of cell.options) {
         validOptions = validOptions.concat(tiles[i].adjacents[UP]);
       }
-      // only validOptions that are already in rightCell.options can stay
+      // only validOptions that are already in upCell.options can stay
       upCell.options = upCell.options.filter((x) => validOptions.includes(x));
     }
     // reduce(upCell, tiles);
@@ -144,7 +143,7 @@ function reduce(cell, tiles) {
       for (let i of cell.options) {
         validOptions = validOptions.concat(tiles[i].adjacents[DOWN]);
       }
-      // only validOptions that are already in rightCell.options can stay
+      // only validOptions that are already in downCell.options can stay
       downCell.options = downCell.options.filter((x) => validOptions.includes(x));
     }
     // reduce(downCell, tiles);
