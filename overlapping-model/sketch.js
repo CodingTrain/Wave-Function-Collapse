@@ -4,7 +4,7 @@ let grid = [];
 const tileSize = 3;
 const DIM = 40;
 
-const recursion_depth = 5;
+const recursion_depth = DIM;
 
 let toggle = false;
 
@@ -14,7 +14,7 @@ const UP = 2;
 const DOWN = 3;
 
 function preload() {
-  img = loadImage('water.png');
+  img = loadImage('flowers.png');
 }
 
 function setup() {
@@ -79,11 +79,11 @@ function draw() {
       cell.checked = false;
       if (cell.collapsed) {
         let index = cell.options[0];
-        if (mouseIsPressed) {
-          renderTile(tiles[index].img, i * w, j * h, w, h);
-        } else {
-          renderCenter(tiles[index].img, i * w, j * h, w, h);
-        }
+        // if (mouseIsPressed) {
+        //   renderTile(tiles[index].img, i * w, j * h, w, h);
+        // } else {
+        renderCenter(tiles[index].img, i * w, j * h, w, h);
+        //}
       } else {
         let rSum = 0;
         let gSum = 0;
