@@ -1,8 +1,9 @@
 
-//void renderCell(PImage img, float x, float y, float w) {
-//  image(img, x, y, w, w);
-//}
-
+boolean differentColor(PImage imgA, int indexA, PImage imgB, int indexB) {
+  int colorA = imgA.pixels[indexA];
+  int colorB = imgB.pixels[indexB];
+  return colorA != colorB;
+}
 
 void renderCell(PImage img, float x, float y, float w) {
   int i = img.width / 2;
@@ -10,10 +11,9 @@ void renderCell(PImage img, float x, float y, float w) {
   int index = i + j * img.width;
   int col = img.pixels[index];
   fill(col);
-  noStroke();
+  stroke(0);
   square(x, y, w);
 }
-
 
 void copyTile(PImage source, int sx, int sy, int w, PImage dest) {
   dest.loadPixels();
@@ -32,30 +32,14 @@ void copyTile(PImage source, int sx, int sy, int w, PImage dest) {
 }
 
 ArrayList<Tile> extractTiles(PImage img) {
-  HashMap<String, Tile> uniqueTiles = new HashMap<>();
+  ArrayList<Tile> tiles = new ArrayList<Tile>();
   img.loadPixels();
-  for (int j = 0; j < img.height - 2; j++) {
-    for (int i = 0; i < img.width - 2; i++) {
+  for (int j = 0; j < img.height; j++) {
+    for (int i = 0; i < img.width; i++) {
       PImage tileImage = createImage(3, 3, RGB);
       copyTile(img, i, j, 3, tileImage);
-      String tileHash = getTileHash(tileImage);
-      if (uniqueTiles.containsKey(tileHash)) {
-        uniqueTiles.get(tileHash).frequency++;
-      } else {
-        Tile newTile = new Tile(tileImage, uniqueTiles.size());
-        uniqueTiles.put(tileHash, newTile);
-      }
+      tiles.add(new Tile(tileImage, tiles.size()));
     }
   }
-  return new ArrayList<>(uniqueTiles.values());
-}
-
-String getTileHash(PImage img) {
-  StringBuilder sb = new StringBuilder();
-  img.loadPixels();
-  for (int i = 0; i < img.pixels.length; i++) {
-    sb.append(img.pixels[i]);
-    sb.append(",");
-  }
-  return sb.toString();
+  return tiles;
 }

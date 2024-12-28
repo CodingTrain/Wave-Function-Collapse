@@ -3,15 +3,11 @@ class Tile {
   PImage img;
   int index;
   ArrayList<Integer>[] neighbors;
-  int frequency;
-  int[] pixels;
 
   Tile(PImage img, int i) {
     this.img = img;
-    this.index = i;
-    this.frequency = 1;
     this.img.loadPixels();
-    this.pixels = this.img.pixels.clone();
+    this.index = i;
     neighbors = new ArrayList[4];
     for (int j = 0; j < 4; j++) {
       neighbors[j] = new ArrayList<Integer>();
@@ -20,28 +16,28 @@ class Tile {
 
   void calculateNeighbors(ArrayList<Tile> tiles) {
     for (int i = 0; i < tiles.size(); i++) {
-      if (this.overlaps(tiles.get(i), TRIGHT)) {
+      if (this.overlapping(tiles.get(i), TRIGHT)) {
         neighbors[TRIGHT].add(i);
       }
-      if (this.overlaps(tiles.get(i), TLEFT)) {
+      if (this.overlapping(tiles.get(i), TLEFT)) {
         neighbors[TLEFT].add(i);
       }
-      if (this.overlaps(tiles.get(i), TUP)) {
+      if (this.overlapping(tiles.get(i), TUP)) {
         neighbors[TUP].add(i);
       }
-      if (this.overlaps(tiles.get(i), TDOWN)) {
+      if (this.overlapping(tiles.get(i), TDOWN)) {
         neighbors[TDOWN].add(i);
       }
     }
   }
 
-  boolean overlaps(Tile other, int direction) {
+  boolean overlapping(Tile other, int direction) {
     if (direction == TRIGHT) {
       for (int i = 1; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
           int indexA = i + j * 3;
           int indexB = (i - 1) + j * 3;
-          if (differentColor(this.pixels[indexA], other.pixels[indexB])) {
+          if (differentColor(this.img, indexA, other.img, indexB)) {
             return false;
           }
         }
@@ -52,7 +48,7 @@ class Tile {
         for (int j = 0; j < 3; j++) {
           int indexA = i + j * 3;
           int indexB = (i + 1) + j * 3;
-          if (differentColor(this.pixels[indexA], other.pixels[indexB])) {
+          if (differentColor(this.img, indexA, other.img, indexB)) {
             return false;
           }
         }
@@ -63,7 +59,7 @@ class Tile {
         for (int i = 0; i < 3; i++) {
           int indexA = i + j * 3;
           int indexB = i + (j + 1) * 3;
-          if (differentColor(this.pixels[indexA], other.pixels[indexB])) {
+          if (differentColor(this.img, indexA, other.img, indexB)) {
             return false;
           }
         }
@@ -74,7 +70,7 @@ class Tile {
         for (int i = 0; i < 3; i++) {
           int indexA = i + j * 3;
           int indexB = i + (j - 1) * 3;
-          if (differentColor(this.pixels[indexA], other.pixels[indexB])) {
+          if (differentColor(this.img, indexA, other.img, indexB)) {
             return false;
           }
         }
