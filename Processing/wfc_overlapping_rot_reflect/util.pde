@@ -98,21 +98,21 @@ byte[] convertToByteArray(int[] pixels) {
 ArrayList<PImage> generateTransformations(PImage tileImage) {
   ArrayList<PImage> transformations = new ArrayList<PImage>();
   PImage currentImage = tileImage;
+  //transformations.add(currentImage);
+
+  for (int k = 0; k < 4; k++) {
+    currentImage = rotateImage(currentImage);
+    transformations.add(currentImage);
+  }
+
+  PImage reflectedImage = reflectImage(tileImage);
+  currentImage = reflectedImage;
   transformations.add(currentImage);
-  return transformations;
 
-  //for (int k = 0; k < 4; k++) {
-  //  currentImage = rotateImage(currentImage);
-  //  transformations.add(currentImage);
-  //}
+  for (int k = 0; k < 4; k++) {
+    currentImage = rotateImage(currentImage);
+    transformations.add(currentImage);
+  }
 
-  //PImage reflectedImage = reflectImage(tileImage);
-  //currentImage = reflectedImage;
-
-  //for (int k = 0; k < 4; k++) {
-  //  currentImage = rotateImage(currentImage);
-  //  transformations.add(currentImage);
-  //}
-
-  //return transformations;
+   return transformations;
 }
