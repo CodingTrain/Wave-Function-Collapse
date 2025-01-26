@@ -7,7 +7,7 @@ Straight out of quantum mechanics, **Wave Function Collapse** (WFC) is an algori
 ## Coding Challenges
 
 - [Coding Challenge #171: Wave Function Collapse](https://thecodingtrain.com/challenges/171-wave-function-collapse)
-- [Coding Challenge #186: WFC Overlapping Model](https://thecodingtrain.com/challenges/186-wfc-overlapping-model) ([Available now exclusively on Nebula!](https://nebula.tv/videos/codingtrain-coding-challenge-186-wave-function-collapse)
+- [Coding Challenge #186: WFC Overlapping Model](https://thecodingtrain.com/challenges/186-wfc-overlapping-model) ([Available now exclusively on Nebula!](https://nebula.tv/videos/codingtrain-coding-challenge-186-wave-function-collapse))
 
 ## Archived Raw Footage
 
