@@ -38,6 +38,12 @@ Wave Function Collapse is a constraint-satisfaction algorithm inspired by quantu
 - [ ] Computed Property Names (Tiled Model) [Issue #35](https://github.com/CodingTrain/Wave-Function-Collapse/issues/35)
 - [ ] Backtracking for conflict resolution.
 
+## Community Contributions and Improvements
+
+- [TileGrid Helper Class](https://github.com/jonnytest1/Wave-Function-Collapse/tree/main) by [@jonnytest1](https://github.com/jonnytest1) A generic grid layout approach using p5.js vectors, making it easier to unify directional logic and reference valid neighboring positions.
+- [Grid Update Optimization](https://github.com/gverger/Wave-Function-Collapse/tree/optim-updates): [Pull Request #40](https://github.com/CodingTrain/Wave-Function-Collapse/pull/40) introduces a more efficient method for updating grid cells by propagating changes only to affected cells, which improves performance and accuracy. The drawing process is also optimized, allowing multiple updates per tick, speeding up the overall process.
+
+
 ## Key Resources
 
 - [Wave Function Collapse algorithm source](https://github.com/mxgmn/WaveFunctionCollapse)
