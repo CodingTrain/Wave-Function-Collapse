@@ -2,7 +2,7 @@
 
 Straight out of quantum mechanics, **Wave Function Collapse** (WFC) is an algorithm for procedural generation of images. This repository features **two approaches** to the WFC: the **Tiled Model** (Coding Challenge 171) and the **Overlapping Model** (Coding Challenge #186). Both implementations are available in JavaScript (p5.js) and ported to Processing (Java).
 
-![GIF animation of the tiled WFC algorithm](gifs/wfc_tiled.gif) ![GIF animation of the tiled WFC algorithm](gifs/wfc_overlapping.gif)
+<img src="gifs/wfc_tiled.gif" alt="GIF animation of the tiled WFC algorithm" height="250"> <img src="gifs/wfc_overlapping.gif" alt="GIF animation of the overlapping WFC algorithm" height="250">
 
 ## Coding Challenges
 
