@@ -2,8 +2,6 @@ class Cell {
   constructor(i, j, value) {
     this.i = i;
     this.j = j;
-    // Initialize the cell as not collapsed
-    this.collapsed = false;
     // Is an array passed in?
     if (value instanceof Array) {
       // Set options to the provided array
