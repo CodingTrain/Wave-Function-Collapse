@@ -1,193 +1,228 @@
-let tiles = [];
-const tileImages = [];
 
-let grid = [];
+let tiles = []
+let grid = []
 
-const DIM = 25;
+const DIM = 25
 
-function preload() {
-  // Load tile images
-  const path = 'tiles/circuit-coding-train';
-  for (let i = 0; i < 13; i++) {
-    tileImages[i] = loadImage(`${path}/${i}.png`);
-  }
-}
+let paintReady = false
+let updateRadiusSquared = 64
 
-function removeDuplicatedTiles(tiles) {
-  // Remove duplicated tiles based on edges
-  const uniqueTilesMap = {};
-  for (const tile of tiles) {
-    const key = tile.edges.join(',');
-    uniqueTilesMap[key] = tile;
-  }
-  return Object.values(uniqueTilesMap);
+function reset() {
+  tiles = []
+  grid = []
+
+  paintReady = false
+  updateRadiusSquared = 64
 }
 
 function setup() {
-  createCanvas(400, 400);
-
-  // Initialize tiles with images and edges
-  tiles[0] = new Tile(tileImages[0], ['AAA', 'AAA', 'AAA', 'AAA']);
-  tiles[1] = new Tile(tileImages[1], ['BBB', 'BBB', 'BBB', 'BBB']);
-  tiles[2] = new Tile(tileImages[2], ['BBB', 'BCB', 'BBB', 'BBB']);
-  tiles[3] = new Tile(tileImages[3], ['BBB', 'BDB', 'BBB', 'BDB']);
-  tiles[4] = new Tile(tileImages[4], ['ABB', 'BCB', 'BBA', 'AAA']);
-  tiles[5] = new Tile(tileImages[5], ['ABB', 'BBB', 'BBB', 'BBA']);
-  tiles[6] = new Tile(tileImages[6], ['BBB', 'BCB', 'BBB', 'BCB']);
-  tiles[7] = new Tile(tileImages[7], ['BDB', 'BCB', 'BDB', 'BCB']);
-  tiles[8] = new Tile(tileImages[8], ['BDB', 'BBB', 'BCB', 'BBB']);
-  tiles[9] = new Tile(tileImages[9], ['BCB', 'BCB', 'BBB', 'BCB']);
-  tiles[10] = new Tile(tileImages[10], ['BCB', 'BCB', 'BCB', 'BCB']);
-  tiles[11] = new Tile(tileImages[11], ['BCB', 'BCB', 'BBB', 'BBB']);
-  tiles[12] = new Tile(tileImages[12], ['BBB', 'BCB', 'BBB', 'BCB']);
-
-  // Assign index to each tile
-  for (let i = 0; i < 12; i++) {
-    tiles[i].index = i;
-  }
-
-  // Generate rotated versions of tiles and remove duplicates
-  const initialTileCount = tiles.length;
-  for (let i = 0; i < initialTileCount; i++) {
-    let tempTiles = [];
-    for (let j = 0; j < 4; j++) {
-      tempTiles.push(tiles[i].rotate(j));
-    }
-    tempTiles = removeDuplicatedTiles(tempTiles);
-    tiles = tiles.concat(tempTiles);
-  }
-  console.log(tiles.length);
-
-  // Analyze tiles to generate adjacency rules
-  for (let i = 0; i < tiles.length; i++) {
-    const tile = tiles[i];
-    tile.analyze(tiles);
-  }
-
-  startOver();
+  createCanvas(600, 600)
+  createUI()
 }
 
-function startOver() {
-  // Initialize grid with cells
+function start() {
   for (let i = 0; i < DIM * DIM; i++) {
     grid[i] = new Cell(tiles.length);
   }
-}
+  gridHistory = [grid]
+  rewindDepth = minRewind
+  maxHistory = 0
+    
 
-function checkValid(arr, valid) {
-  // Remove invalid options from array
-  for (let i = arr.length - 1; i >= 0; i--) {
-    let element = arr[i];
-    if (!valid.includes(element)) {
-      arr.splice(i, 1);
-    }
-  }
+  paintReady = true
+  loop()
 }
 
 function draw() {
+  if (!paintReady)
+    return
+
   background(0);
 
-  // Draw grid cells
+  // drawEdges()
+  // return
+
+  if (drawTileOptions())
+    return
+
+  paintReady = false
+
+  drawGrid()
+
+  let pickedIndex = collapseLowestEntropy()
+  if (pickedIndex < 0)
+    return
+
+  updateGrid(pickedIndex)
+
+  decreaseRewind()
+
+  paintReady = true
+}
+
+function drawGrid() {
   const w = width / DIM;
   const h = height / DIM;
+  noFill();
+  stroke(51);
   for (let j = 0; j < DIM; j++) {
     for (let i = 0; i < DIM; i++) {
       let cell = grid[i + j * DIM];
       if (cell.collapsed) {
-        let index = cell.options[0];
+        let index = cell.options.keys().next().value;
         image(tiles[index].img, i * w, j * h, w, h);
       } else {
-        noFill();
-        stroke(51);
         rect(i * w, j * h, w, h);
       }
     }
   }
+}
 
-  // Pick cell with least entropy
-  let gridCopy = grid.slice();
-  gridCopy = gridCopy.filter((a) => !a.collapsed);
+function collapseLowestEntropy() {
+  // Build an array of all cells with the lowest entropy
+  let lowestEntropy = 10000000;
+  let lowestIndexes= [];
 
-  if (gridCopy.length == 0) {
-    return;
-  }
-  gridCopy.sort((a, b) => {
-    return a.options.length - b.options.length;
-  });
-
-  let len = gridCopy[0].options.length;
-  let stopIndex = 0;
-  for (let i = 1; i < gridCopy.length; i++) {
-    if (gridCopy[i].options.length > len) {
-      stopIndex = i;
-      break;
+  for (let i = 0; i < grid.length; i++) {
+    let cell = grid[i];
+    if (cell.collapsed)
+      continue
+    let entropy = cell.options.size
+    if (entropy < lowestEntropy) {
+      lowestIndexes = [i]
+      lowestEntropy = entropy
+    }
+    else if (entropy == lowestEntropy) {
+      lowestIndexes.push(i)
     }
   }
 
-  if (stopIndex > 0) gridCopy.splice(stopIndex);
-  const cell = random(gridCopy);
+  // No lowest entropy means all cells are collapsed
+  // we are done with the WFC
+  if (lowestIndexes.length == 0) {
+    noLoop()
+    return -1
+  }
+
+  // If the lowest entropy is zero, it means there is a cell
+  // wihtout any option left, we reached a contraction, so
+  // rewind history and try again.
+  if (lowestEntropy <= 0) {
+    rewindHistory()
+    return -1
+  }
+
+  // Pick a random cell with lowest entropy.
+  let chosenIndex = random(lowestIndexes)
+  updateGrid(chosenIndex)
+  cell = grid[chosenIndex]
+  if (cell.options.size == 0) {
+    rewindHistory()
+    return -1
+  }
+
+  // Collapse the cell to one of its tile options.
+  const pick = floor(random(cell.options.size))
+  let optionsArr = Array.from(cell.options)
+  let pickedIndex = optionsArr[pick]
+
   cell.collapsed = true;
-  const pick = random(cell.options);
-  if (pick === undefined) {
-    startOver();
-    return;
+  cell.options = new Set();
+  cell.options.add(pickedIndex)
+
+  return pickedIndex
+}
+
+function updateCell(index) {
+  let cell = grid[index]
+  if (cell.collapsed) {
+    return cell
   }
-  cell.options = [pick];
 
-  // Update grid with new options
-  const nextGrid = [];
-  for (let j = 0; j < DIM; j++) {
-    for (let i = 0; i < DIM; i++) {
-      let index = i + j * DIM;
-      if (grid[index].collapsed) {
-        nextGrid[index] = grid[index];
-      } else {
-        let options = new Array(tiles.length).fill(0).map((x, i) => i);
-        // Look up
-        if (j > 0) {
-          let up = grid[i + (j - 1) * DIM];
-          let validOptions = [];
-          for (let option of up.options) {
-            let valid = tiles[option].down;
-            validOptions = validOptions.concat(valid);
-          }
-          checkValid(options, validOptions);
+  let options = new Set(cell.options.keys())
+  {
+    if (index >= DIM) {
+      let upIndex = index - DIM;
+      up = grid[upIndex]
+      upOptions = new Set()
+      for (let option of up.options) {
+        upOptions = upOptions.union(tiles[int(option)].down)
+        if (upOptions.size == tiles.length) {
+          break
         }
-        // Look right
-        if (i < DIM - 1) {
-          let right = grid[i + 1 + j * DIM];
-          let validOptions = [];
-          for (let option of right.options) {
-            let valid = tiles[option].left;
-            validOptions = validOptions.concat(valid);
-          }
-          checkValid(options, validOptions);
-        }
-        // Look down
-        if (j < DIM - 1) {
-          let down = grid[i + (j + 1) * DIM];
-          let validOptions = [];
-          for (let option of down.options) {
-            let valid = tiles[option].up;
-            validOptions = validOptions.concat(valid);
-          }
-          checkValid(options, validOptions);
-        }
-        // Look left
-        if (i > 0) {
-          let left = grid[i - 1 + j * DIM];
-          let validOptions = [];
-          for (let option of left.options) {
-            let valid = tiles[option].right;
-            validOptions = validOptions.concat(valid);
-          }
-          checkValid(options, validOptions);
-        }
-
-        nextGrid[index] = new Cell(options);
       }
+      options = options.intersection(upOptions)
     }
   }
 
+  {
+    if (index < grid.length - DIM) {
+      let downIndex = index + DIM;
+      down = grid[downIndex]
+      downOptions = new Set()
+      for (let option of down.options) {
+        downOptions = downOptions.union(tiles[int(option)].up)
+        if (downOptions.size == tiles.length) {
+          break
+        }
+      }
+      options = options.intersection(downOptions)
+    }
+  }
+
+  {
+    if (index % DIM != 0) {
+      let leftIndex = index - 1;
+      left = grid[leftIndex]
+      leftOptions = new Set()
+      for (let option of left.options) {
+        leftOptions = leftOptions.union(tiles[int(option)].right)
+        if (leftOptions.size == tiles.length) {
+          break
+        }
+      }
+      options = options.intersection(leftOptions)
+    }
+  }
+
+  {
+    let rightIndex = index + 1;
+    if (rightIndex % DIM != 0) {
+      right = grid[rightIndex]
+      rightOptions = new Set()
+      for (let option of right.options) {
+        rightOptions = rightOptions.union(tiles[int(option)].left)
+        if (rightOptions.size == tiles.length) {
+          break
+        }
+      }
+      options = options.intersection(rightOptions)
+    }
+  }
+
+  return new Cell(options)
+}
+
+function updateGrid(pickedIndex) {
+  let pickedX = pickedIndex % DIM
+  let pickedY = int(floor(pickedIndex / DIM))
+
+  const nextGrid = grid.slice();
+  for (let index = 0; index < grid.length; index++) {
+    {
+      let x = index % DIM
+      let y = int(floor(index / DIM))
+      let dx = x - pickedX
+      let dy = y - pickedY
+  
+      let distSq = dx *dx + dy * dy
+      if (distSq > updateRadiusSquared)
+        continue
+    }
+  
+    nextGrid[index] = updateCell(index)
+  }
+
+  gridHistory.push(nextGrid)
   grid = nextGrid;
 }
