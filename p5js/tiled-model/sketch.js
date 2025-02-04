@@ -46,12 +46,12 @@ function draw() {
   if (drawEdges())
     return
 
+  drawGrid()
+
   if (!paintReady)
     return
 
   paintReady = false
-
-  drawGrid()
 
   let pickedIndex = collapseLowestEntropy()
   if (pickedIndex < 0)
@@ -72,7 +72,7 @@ function drawGrid() {
   for (let j = 0; j < DIM; j++) {
     for (let i = 0; i < DIM; i++) {
       let cell = grid[i + j * DIM];
-      if (cell.collapsed) {
+      if (cell != undefined && cell.collapsed) {
         let index = cell.options.first_value()
         image(tiles[index].img, i * w, j * h, w, h);
       } else {
