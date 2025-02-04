@@ -5,7 +5,7 @@ let grid = []
 const DIM = 25
 
 let paintReady = false
-let updateRadiusSquared = 64
+let updateRadiusSquared = 100
 
 function reset() {
   tiles = []
@@ -33,16 +33,20 @@ function start() {
   loop()
 }
 
-function draw() {
-  if (!paintReady)
-    return
+function mouseClicked(event) {
+  logCellOptions()
+}
 
+function draw() {
   background(0);
 
-  // drawEdges()
-  // return
-
   if (drawTileOptions())
+    return
+
+  if (drawEdges())
+    return
+
+  if (!paintReady)
     return
 
   paintReady = false
@@ -69,7 +73,7 @@ function drawGrid() {
     for (let i = 0; i < DIM; i++) {
       let cell = grid[i + j * DIM];
       if (cell.collapsed) {
-        let index = cell.options.keys().next().value;
+        let index = cell.options.first_value()
         image(tiles[index].img, i * w, j * h, w, h);
       } else {
         rect(i * w, j * h, w, h);
@@ -87,7 +91,7 @@ function collapseLowestEntropy() {
     let cell = grid[i];
     if (cell.collapsed)
       continue
-    let entropy = cell.options.size
+    let entropy = cell.options.size()
     if (entropy < lowestEntropy) {
       lowestIndexes = [i]
       lowestEntropy = entropy
@@ -116,18 +120,17 @@ function collapseLowestEntropy() {
   let chosenIndex = random(lowestIndexes)
   updateGrid(chosenIndex)
   cell = grid[chosenIndex]
-  if (cell.options.size == 0) {
+  if (cell.options.size() == 0) {
     rewindHistory()
     return -1
   }
 
   // Collapse the cell to one of its tile options.
-  const pick = floor(random(cell.options.size))
-  let optionsArr = Array.from(cell.options)
-  let pickedIndex = optionsArr[pick]
+  const pick = floor(random(cell.options.size()))
+  let pickedIndex = cell.options.to_array()[pick]
 
   cell.collapsed = true;
-  cell.options = new Set();
+  cell.options.truncate(0)
   cell.options.add(pickedIndex)
 
   return pickedIndex
@@ -139,19 +142,19 @@ function updateCell(index) {
     return cell
   }
 
-  let options = new Set(cell.options.keys())
+  let options = new Bitmap()
+  let otherOptions = new Bitmap()
+
+  options.in_place_union(cell.options)
   {
     if (index >= DIM) {
       let upIndex = index - DIM;
       up = grid[upIndex]
-      upOptions = new Set()
+      otherOptions.clear()
       for (let option of up.options) {
-        upOptions = upOptions.union(tiles[int(option)].down)
-        if (upOptions.size == tiles.length) {
-          break
-        }
+        otherOptions.in_place_union(tiles[option].down)
       }
-      options = options.intersection(upOptions)
+      options.in_place_intersection(otherOptions)
     }
   }
 
@@ -159,14 +162,11 @@ function updateCell(index) {
     if (index < grid.length - DIM) {
       let downIndex = index + DIM;
       down = grid[downIndex]
-      downOptions = new Set()
+      otherOptions.clear()
       for (let option of down.options) {
-        downOptions = downOptions.union(tiles[int(option)].up)
-        if (downOptions.size == tiles.length) {
-          break
-        }
+        otherOptions.in_place_union(tiles[option].up)
       }
-      options = options.intersection(downOptions)
+      options.in_place_intersection(otherOptions)
     }
   }
 
@@ -174,14 +174,11 @@ function updateCell(index) {
     if (index % DIM != 0) {
       let leftIndex = index - 1;
       left = grid[leftIndex]
-      leftOptions = new Set()
+      otherOptions.clear()
       for (let option of left.options) {
-        leftOptions = leftOptions.union(tiles[int(option)].right)
-        if (leftOptions.size == tiles.length) {
-          break
-        }
+        otherOptions.in_place_union(tiles[option].right)
       }
-      options = options.intersection(leftOptions)
+      options.in_place_intersection(otherOptions)
     }
   }
 
@@ -189,14 +186,11 @@ function updateCell(index) {
     let rightIndex = index + 1;
     if (rightIndex % DIM != 0) {
       right = grid[rightIndex]
-      rightOptions = new Set()
+      otherOptions.clear()
       for (let option of right.options) {
-        rightOptions = rightOptions.union(tiles[int(option)].left)
-        if (rightOptions.size == tiles.length) {
-          break
-        }
+        otherOptions.in_place_union(tiles[option].left)
       }
-      options = options.intersection(rightOptions)
+      options.in_place_intersection(otherOptions)
     }
   }
 

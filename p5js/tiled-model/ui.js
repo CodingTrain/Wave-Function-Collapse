@@ -47,7 +47,6 @@ function createUI() {
     showNeighborsCheck.mouseClicked(function(){
         enableDrawTileOptions(showNeighborsCheck.checked())
         loop()
-        paintReady = true
     })
 
     let showNeighborsLabel = add_ui_to_line(createSpan('Showing tile #1   '))
@@ -61,5 +60,20 @@ function createUI() {
     nextDrawTileButton.mouseClicked(function() {
         changeDrawnTileOptions(1)
         showNeighborsLabel.html(`Showing tile #${drawnTileIndex+1}   `)
+    })
+
+    start_ui_line()
+
+    let showEdgesCheck = add_ui_to_line(createCheckbox('Show unique tile edges'))
+    showEdgesCheck.mouseClicked(function(){
+        enableDrawEdges(showEdgesCheck.checked())
+        loop()
+    })
+
+    start_ui_line()
+
+    let logCellOptionsCheck = add_ui_to_line(createCheckbox('Log the options of a clicked cell'))
+    logCellOptionsCheck.mouseClicked(function(){
+        enableLogCellOptions(logCellOptionsCheck.checked())
     })
 }

@@ -4,10 +4,10 @@ class Tile {
     this.img = img
     this.notSelf = notSelf
     this.edges = []
-    this.up = new Set()
-    this.right = new Set()
-    this.down = new Set()
-    this.left = new Set()
+    this.up = new Bitmap()
+    this.right = new Bitmap()
+    this.down = new Bitmap()
+    this.left = new Bitmap()
     this.index = index
   }
 

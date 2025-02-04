@@ -36,21 +36,21 @@ class Edge {
       }
       // Right
       if (side == 1) {
-        this.img = createImage(1, img.height)
+        this.img = createImage(1, edge_size)
         this.img.copy(img,
           img.width - 1, 0, 1, img.height,
           0, 0,             1, edge_size)
       }
       // Bottom
       if (side == 2) {
-        this.img = createImage(img.width, 1)
+        this.img = createImage(edge_size, 1)
         this.img.copy(img,
           0, img.height - 1, img.width, 1,
           0, 0,              edge_size, 1)
       }
       // Left
       if (side == 3) {
-        this.img = createImage(1, img.height)
+        this.img = createImage(1, edge_size)
         this.img.copy(img,
           0, 0, 1, img.height,
           0, 0, 1, edge_size)
@@ -79,7 +79,8 @@ class Edge {
 
       // Allow some small differences in RGB colors to allow
       // small mis-match
-      let max_diff = 8
+      let range = min(1, int(floor(edge_size / 4)))
+      let max_diff = edge_size * 2
       let diff_r = 0
       let diff_g = 0
       let diff_b = 0
@@ -88,7 +89,6 @@ class Edge {
         let r1 = this.img.pixels[x1 * 4 + 0]
         let g1 = this.img.pixels[x1 * 4 + 1]
         let b1 = this.img.pixels[x1 * 4 + 2]
-        let range = int(floor(edge_size / 4))
         let best_r = 100
         let best_g = 100
         let best_b = 100
