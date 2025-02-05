@@ -1,4 +1,9 @@
 let tileImages = []
+let areTilesRotationAllowed = true
+
+function enableTileRotations(enabled) {
+  areTilesRotationAllowed = enabled
+}
 
 class TileLoader {
   constructor(url, allowRotations) {
@@ -53,7 +58,7 @@ class TileLoader {
     }
     
     // Generate rotated versions of tiles and remove duplicates
-    if (this.allowRotations) {
+    if (this.allowRotations && areTilesRotationAllowed) {
       const initialTileCount = tiles.length;
       for (let i = 0; i < initialTileCount; i++) {
         for (let j = 0; j < 4; j++) {
@@ -62,6 +67,9 @@ class TileLoader {
       }
     }
 
+    tiles = this._removeDuplicatedTiles(tiles);
+    // console.log(`Total rotated tiles: ${tiles.length}`);
+  
     // Detect matching edges
     reset_edges()
     for (let i = 0; i < tiles.length; i++) {
@@ -69,9 +77,6 @@ class TileLoader {
       // console.log(`Tile ${i} edges: ${tiles[i].edges}`)
     }
     // console.log(edges)
-  
-    tiles = this._removeDuplicatedTiles(tiles);
-    // console.log(`Total rotated tiles: ${tiles.length}`);
   
     // Analyze tiles to generate adjacency rules
     for (let i = 0; i < tiles.length; i++) {
@@ -81,12 +86,16 @@ class TileLoader {
   }
 
   _removeDuplicatedTiles(tiles) {
-    // Remove duplicated tiles based on edges
-    // TODO: maybe use canvas.toDataURL to get unique image hash instead
-    const uniqueTilesMap = {};
+    // Remove duplicated tiles based on its content
+    const uniqueTilesMap = new Map()
     for (const tile of tiles) {
-      const key = tile.edges.join(',');
-      uniqueTilesMap[key] = tile;
+      const key = tile.img.canvas.toDataURL();
+      if (uniqueTilesMap.has(key)) {
+        uniqueTilesMap[key].frequency++
+      }
+      else {
+        uniqueTilesMap[key] = tile;
+      }
     }
     return Object.values(uniqueTilesMap);
   }
@@ -128,7 +137,7 @@ class SingleImageTileLoader extends TileLoader {
 
 class DirectionalTileLoader extends TileLoader {
   constructor(url) {
-    super(url, true)
+    super(url, false)
   }
 
   _load() {

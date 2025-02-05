@@ -53,11 +53,8 @@ function draw() {
 
   paintReady = false
 
-  let pickedIndex = collapseLowestEntropy()
-  if (pickedIndex < 0)
+  if (!collapseLowestEntropy())
     return
-
-  updateGrid(pickedIndex)
 
   decreaseRewind()
 
@@ -105,7 +102,7 @@ function collapseLowestEntropy() {
   // we are done with the WFC
   if (lowestIndexes.length == 0) {
     noLoop()
-    return -1
+    return false
   }
 
   // If the lowest entropy is zero, it means there is a cell
@@ -113,27 +110,22 @@ function collapseLowestEntropy() {
   // rewind history and try again.
   if (lowestEntropy <= 0) {
     rewindHistory()
-    return -1
+    return false
   }
 
   // Pick a random cell with lowest entropy.
-  let chosenIndex = random(lowestIndexes)
-  updateGrid(chosenIndex)
-  cell = grid[chosenIndex]
-  if (cell.options.size() == 0) {
+  let chosenCellIndex = random(lowestIndexes)
+
+  // Make sure to update the grid now because the cell options
+  // might not be up-to-date due to the propagation distance limit
+  updateGrid(chosenCellIndex)
+
+  if (!grid[chosenCellIndex].collapse()) {
     rewindHistory()
-    return -1
+    return false
   }
 
-  // Collapse the cell to one of its tile options.
-  const pick = floor(random(cell.options.size()))
-  let pickedIndex = cell.options.to_array()[pick]
-
-  cell.collapsed = true;
-  cell.options.truncate(0)
-  cell.options.add(pickedIndex)
-
-  return pickedIndex
+  return true
 }
 
 function updateCell(index) {

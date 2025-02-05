@@ -9,6 +9,7 @@ class Tile {
     this.down = new Bitmap()
     this.left = new Bitmap()
     this.index = index
+    this.frequency = 1
   }
 
   fillEdges(filter) {
