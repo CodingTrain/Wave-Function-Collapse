@@ -2,6 +2,8 @@ let ui_div = undefined
 let ui_line_div = undefined
 
 let current_loader = undefined
+let current_loading = undefined
+
 let tileFileInput = undefined
 let tileFileLabel = undefined
 let tileSizeInput = undefined
@@ -58,10 +60,28 @@ function _update_ui_with_loader() {
     }
 }
 
+function _stop_loading() {
+    if (current_loader == undefined)
+        return
+    current_loader.cancel_load()
+    current_loader = undefined
+}
+
 function _reload() {
     if (current_loader == undefined)
         return
-    current_loader.load()
+    current_loader.cancel_load()
+    current_loading = current_loader.load()
+}
+
+function is_loading_done() {
+    if (current_loading == undefined)
+        return undefined
+    let it = current_loading.next()
+    if (it.done) {
+        current_loading = undefined
+    }
+    return it.value
 }
 
 function _load_from_file(selected_file) {
@@ -194,6 +214,13 @@ function createUI() {
         noLoop()
     })
 
+    add_separator_to_line()
+
+    let cancelButton = add_ui_to_line(createButton('Cancel'))
+    cancelButton.mouseClicked(function() {
+        imageSelect.selected('Choose a tile set')
+        _stop_loading()
+    })
 
     start_ui_line()
 
