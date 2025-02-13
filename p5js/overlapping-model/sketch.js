@@ -93,10 +93,10 @@ function wfc() {
 
   for (let cell of grid) {
     if (!cell.collapsed) {
-      if (cell.options.length < minEntropy) {
-        minEntropy = cell.options.length;
+      if (cell.entropy < minEntropy) {
+        minEntropy = cell.entropy;
         lowestEntropyCells = [cell];
-      } else if (cell.options.length === minEntropy) {
+      } else if (cell.entropy === minEntropy) {
         lowestEntropyCells.push(cell);
       }
     }

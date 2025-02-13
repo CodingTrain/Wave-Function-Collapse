@@ -92,11 +92,11 @@ void wfc() {
 
   for (Cell c : grid) {
     if (!c.collapsed) {
-      if (c.options.size() < minEntropy) {
-        minEntropy = c.options.size();
+      if (c.entropy < minEntropy) {
+        minEntropy = c.entropy;
         lowestEntropyCells.clear();
         lowestEntropyCells.add(c);
-      } else if (c.options.size() == minEntropy) {
+      } else if (c.entropy == minEntropy) {
         lowestEntropyCells.add(c);
       }
     }
