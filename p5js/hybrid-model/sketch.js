@@ -7,7 +7,7 @@ const updateOtherOptions = new Bitmap()
 const DIM = 40
 
 let paintReady = false
-let loadFreq = 20
+let loadFreq = 400
 let loadCount = 0
 let updateRadiusSquared = 10000
 
@@ -64,15 +64,19 @@ function draw() {
 
   loading_progress = is_loading_done()
   if (loading_progress != undefined) {
-    if (frameRate > 4)
-      loadFreq = frameRate / 4
-    if (loadCount++ % loadFreq != 0)
-      return
-
     background(0)
     fill(240)
     textSize(32)
     text(loading_progress, 20, height/2 - 32)
+
+    if (frameRate >= 10)
+      loadFreq *= 1.5
+    else if (frameRate < 3)
+      loadFreq /= 1.2
+    for (let i = 0; i < loadFreq; i++)
+      if (is_loading_done() == undefined)
+        break
+
     return
   }
 
