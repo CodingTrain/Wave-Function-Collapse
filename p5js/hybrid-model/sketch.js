@@ -7,6 +7,8 @@ const updateOtherOptions = new Bitmap()
 const DIM = 40
 
 let paintReady = false
+let loadFreq = 20
+let loadCount = 0
 let updateRadiusSquared = 10000
 
 function setup() {
@@ -59,6 +61,20 @@ function draw() {
 
   if (drawEdges())
     return
+
+  loading_progress = is_loading_done()
+  if (loading_progress != undefined) {
+    if (frameRate > 4)
+      loadFreq = frameRate / 4
+    if (loadCount++ % loadFreq != 0)
+      return
+
+    background(0)
+    fill(240)
+    textSize(32)
+    text(loading_progress, 20, height/2 - 32)
+    return
+  }
 
   drawGrid()
 

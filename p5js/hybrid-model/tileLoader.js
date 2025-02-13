@@ -16,6 +16,7 @@ class TileLoader {
     this.waitingCount = 0
     this.edge_depth = edge_depth
     this.edgeFilter = undefined
+    this.load_canceled = false
   }
 
   setEdgeFilter(filter) {
@@ -23,10 +24,26 @@ class TileLoader {
     return this
   }
 
-  load() {
+  *load() {
+    this.cancel_load()
+    this.load_canceled = false
+    this._load()
+    while (this.waitingCount > 0) {
+      yield `Waiting for ${this.waitingCount} images`
+      if (this.load_canceled)
+        return
+    }
+
+    yield* this._prepareTiles()
+    this.load_canceled = true
+    start()
+  }
+
+  cancel_load() {
+    this.load_canceled = true
+    this.waitingCount = 0
     reset()
     tileImages = []
-    this._load()
   }
 
   _addImage(img, index) {
@@ -35,19 +52,18 @@ class TileLoader {
 
   _loaded(img, index) {
     this._addImage(img, index)
-
     this.waitingCount -= 1
-    if (this.waitingCount == 0) {
-      this._prepareTiles()
-      start()
-    }
   }
 
-  _prepareTiles(edge_depth, notSelves) {
+  *_prepareTiles(notSelves) {
+
     set_edge_size(tileImages)
   
     // Initialize tiles with images and edges
     for (let i = 0; i < tileImages.length; i++) {
+      yield `Creating tile #${i+1} of ${tileImages.length}`
+      if (this.load_canceled)
+        return
       tiles[i] = new Tile(tileImages[i], this.edge_depth, false, i);
     }
 
@@ -66,6 +82,9 @@ class TileLoader {
     if (areTilesFlipsAllowed) {
       const initialTileCount = tiles.length;
       for (let i = 0; i < initialTileCount; i++) {
+        yield `Flipping tile #${i+1} of ${initialTileCount}`
+        if (this.load_canceled)
+          return
         tiles.push(tiles[i].flip());
       }
       // console.log(`Total after flipping tiles: ${tiles.length}`);
@@ -76,6 +95,9 @@ class TileLoader {
       const initialTileCount = tiles.length;
       for (let i = 0; i < initialTileCount; i++) {
         for (let j = 1; j < 4; j++) {
+          yield `Rotating ${j * 90} degrees tile #${i+1} of ${initialTileCount}`
+          if (this.load_canceled)
+            return
           tiles.push(tiles[i].rotate(j));
         }
       }
@@ -85,20 +107,29 @@ class TileLoader {
     // Detect matching tile edges
     reset_edges()
     for (let i = 0; i < tiles.length; i++) {
+      yield `Filling edges of tile #${i+1} of ${tiles.length}`
+      if (this.load_canceled)
+        return
       tiles[i].fillEdges(this.edgeFilter)
       // console.log(`Tile ${i} edges: ${tiles[i].edges}`)
     }
     // console.log(edges)
   
     // Remove duplicate tiles
-    tiles = this._removeDuplicatedTiles(tiles);
-    // console.log(`Total after removing duplicate tiles: ${tiles.length}`);
+    yield* this._removeDuplicatedTiles(tiles);
+    if (this.load_canceled)
+      return
+  // console.log(`Total after removing duplicate tiles: ${tiles.length}`);
   
     // Analyze tiles to generate adjacency rules
     for (let i = 0; i < tiles.length; i++) {
+      yield `Analyzing tile #${i+1} of ${tiles.length}`
+      if (this.load_canceled)
+        return
       const tile = tiles[i];
       tile.analyze(tiles);
     }
+    // console.log(`Tiles analysis done`);
   }
 
   _areImagesSimilar(img1, img2) {
@@ -123,10 +154,13 @@ class TileLoader {
     return (diffPercent <= percentSame)
   }
 
-  _removeDuplicatedTiles(tiles) {
+  *_removeDuplicatedTiles(tiles) {
     // Remove duplicated tiles based on its content
     const uniqueTilesMap = new Map()
     for (const tile of tiles) {
+      yield `Removing duplicates of tile #${tile.index+1} of ${tiles.length}`
+      if (this.load_canceled)
+        return
       // Try to find an existing similar tile.
       let foundSimilar = false
 
@@ -135,6 +169,9 @@ class TileLoader {
       if (uniqueTilesMap.has(key)) {
         const existingTiles = uniqueTilesMap.get(key)
         for (let existing of existingTiles) {
+          yield `Comparing to tile #${existing.index+1} of ${existing.length}`
+          if (this.load_canceled)
+            return
           foundSimilar = this._areImagesSimilar(tile.img, existing.img)
           if (foundSimilar) {
             existing.frequency++
@@ -148,14 +185,12 @@ class TileLoader {
       }
     }
 
-    tiles = []
+    tiles.length = 0
     for (let existingTiles of uniqueTilesMap.values()) {
       for (let tile of existingTiles) {
         tiles.push(tile)
       }
     }
-
-    return tiles
   }
   
   _failed(event) {
@@ -177,13 +212,20 @@ class SingleImageTileLoader extends TileLoader {
     loadImage(self.url, function (img) { self._loaded(img, 0) }, function (event) { self._failed(event) })
   }
 
-  _addImage(img, index) {
-    this._tileImage(img, this.tile_size, this.tile_step)
-  }
+  *_prepareTiles(notSelves) {
+    const img = tileImages[0]
+    tileImages.length = 0
 
-  _tileImage(img, size, step) {
+    const size = this.tile_size
+    const step = this.tile_step
+    const totalCount = (img.width / step) * (img.height / step)
+    let tileIndex = 0
+
     for (let x = 0; x < img.width; x += step ) {
       for (let y = 0; y < img.height; y += step ) {
+        yield `Extracting tile #${++tileIndex} of ${totalCount}`
+        if (this.load_canceled)
+          return
         // console.log(`making image ${x} / ${y}`)
         let tileImg = createImage(size, size)
         const missing_x = Math.max(0, x + size - img.width)
@@ -215,6 +257,8 @@ class SingleImageTileLoader extends TileLoader {
       }
     }
     // console.log(`Made ${tileImages.length} images`)
+
+    yield* super._prepareTiles(notSelves)
   }
 }
 
@@ -249,8 +293,8 @@ class NumberedImagesTileLoader extends TileLoader {
     }
   }
 
-  _prepareTiles() {
-    super._prepareTiles(this.notSelves)
+  *_prepareTiles() {
+    yield* super._prepareTiles(this.notSelves)
   }
 }
 
