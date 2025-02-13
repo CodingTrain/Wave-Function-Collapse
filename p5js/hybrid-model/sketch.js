@@ -6,9 +6,6 @@ const updateOtherOptions = new Bitmap()
 
 const DIM = 40
 
-let paintReady = false
-let loadFreq = 400
-let loadCount = 0
 let updateRadiusSquared = 10000
 
 function setup() {
@@ -22,7 +19,6 @@ function reset() {
   tiles = []
   clearGrid()
   clearContradictions()
-  paintReady = false
 }
 
 function clearContradictions() {
@@ -47,8 +43,7 @@ function start() {
   rewindDepth = minRewind
   maxHistory = 0
 
-  paintReady = true
-  loop()
+  queue_algorithm(new HybridWFC())
 }
 
 function mouseClicked(event) {
@@ -62,35 +57,8 @@ function draw() {
   if (drawEdges())
     return
 
-  loading_progress = is_loading_done()
-  if (loading_progress != undefined) {
-    background(0)
-    fill(240)
-    textSize(32)
-    text(loading_progress, 20, height/2 - 32)
-
-    if (frameRate >= 10)
-      loadFreq *= 1.5
-    else if (frameRate < 3)
-      loadFreq /= 1.2
-    for (let i = 0; i < loadFreq; i++)
-      if (is_loading_done() == undefined)
-        break
-
-    return
-  }
+  progress = run_current_algorithm_at_fps()
+  update_progress_ui(progress)
 
   drawGrid()
-
-  if (!paintReady)
-    return
-
-  paintReady = false
-
-  if (!collapseLowestEntropy())
-    return
-
-  decreaseRewind()
-
-  paintReady = true
 }
