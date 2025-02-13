@@ -191,6 +191,7 @@ function createUI() {
     let drawSmoothCheck = add_ui_to_line(createCheckbox('Smooth scale tile images', false))
     drawSmoothCheck.mouseClicked(function(){
         enableDrawSmooth(drawSmoothCheck.checked())
+        triggerFullRedraw()
     })
 
     start_ui_line()
