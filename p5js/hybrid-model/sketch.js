@@ -6,7 +6,6 @@ const updateOtherOptions = new Bitmap()
 
 const DIM = 40
 
-let paintReady = false
 let updateRadiusSquared = 10000
 
 function setup() {
@@ -20,7 +19,6 @@ function reset() {
   tiles = []
   clearGrid()
   clearContradictions()
-  paintReady = false
 }
 
 function clearContradictions() {
@@ -45,8 +43,7 @@ function start() {
   rewindDepth = minRewind
   maxHistory = 0
 
-  paintReady = true
-  loop()
+  queue_algorithm(new HybridWFC())
 }
 
 function mouseClicked(event) {
@@ -60,17 +57,8 @@ function draw() {
   if (drawEdges())
     return
 
+  progress = run_current_algorithm_at_fps()
+  update_progress_ui(progress)
+
   drawGrid()
-
-  if (!paintReady)
-    return
-
-  paintReady = false
-
-  if (!collapseLowestEntropy())
-    return
-
-  decreaseRewind()
-
-  paintReady = true
 }

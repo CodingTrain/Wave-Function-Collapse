@@ -18,6 +18,8 @@ function drawEdges() {
   else
     noSmooth()
 
+  background(0)
+
   let spacing = 10
 
   let sizes = edges.map(function(edge) {
@@ -76,6 +78,8 @@ function drawTileOptions() {
     smooth()
   else
     noSmooth()
+
+  background(0)
 
   drawnTileIndex = (drawnTileIndex + tiles.length) % tiles.length
 

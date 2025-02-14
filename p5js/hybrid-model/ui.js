@@ -2,17 +2,19 @@ let ui_div = undefined
 let ui_line_div = undefined
 
 let current_loader = undefined
+
 let tileFileInput = undefined
 let tileFileLabel = undefined
 let tileSizeInput = undefined
 let tileStepInput = undefined
 let tileOverlapInput = undefined
+let progressLabel = undefined
 
 function start_ui() {
     ui_div = createDiv()
     ui_div.position(width + 20, 20)
     ui_div.style('background:white')
-    ui_div.style('width:300pt')
+    ui_div.style('width:350pt')
     ui_div.style('height:400pt')
     ui_div.style('padding:8pt')
 }
@@ -34,18 +36,25 @@ function add_separator_to_line() {
 }
 
 function _update_loader_with_ui() {
+    // TODO: updating a file input with its value does not work/
     // tileFileInput.value(current_loader.url)
+
     if (current_loader instanceof SingleImageTileLoader) {
         current_loader.tile_size = max(1, int(tileSizeInput.value()))
         current_loader.tile_step = max(1, int(tileStepInput.value()))
         current_loader.edge_depth = max(1, int(tileOverlapInput.value()) + 1)
-        _reload()
+        return true
     }
+    return false
 }
 
 function _update_file_label(url) {
-    let lastPart = url.match('([^/.]+)+/?(\.[a-zA-Z0-9]+)?$')[1]
-    tileFileLabel.html(lastPart)
+    let fileName
+    if (url != undefined)
+        fileName = url.match('([^/.]+)+/?(\.[a-zA-Z0-9]+)?$')[1]
+    else
+        fileName = '(No file selected)'
+    tileFileLabel.html(fileName)
 }
 
 function _update_ui_with_loader() {
@@ -54,14 +63,12 @@ function _update_ui_with_loader() {
         tileSizeInput.value(current_loader.tile_size)
         tileStepInput.value(current_loader.tile_step)
         tileOverlapInput.value(current_loader.edge_depth - 1)
-        _reload()
     }
 }
 
 function _reload() {
-    if (current_loader == undefined)
-        return
-    current_loader.load()
+    stop_all_algorithms()
+    queue_algorithm(current_loader)
 }
 
 function _load_from_file(selected_file) {
@@ -78,14 +85,22 @@ function _load_from_file(selected_file) {
     _reload()
 }
 
+function update_progress_ui(progress) {
+    if (progress == undefined)
+        progress = ''
+    else
+        progress = `: <span style="font-size:11pt">${progress}</span>`
+
+    progressLabel.html(`<h3 style="font-size:14pt">Image Generation${progress}</h3>`)
+}
+
 function createUI() {
     start_ui()
 
     start_ui_line()
 
-    add_ui_to_line(createSpan("<h3>Image Generation</h3>"))
-
-    start_ui_line()
+    progressLabel = add_ui_to_line(createSpan())
+    update_progress_ui()
 
     add_ui_to_line(createSpan('Available tiles '))
     let imageSelect = add_ui_to_line(createSelect())
@@ -125,7 +140,8 @@ function createUI() {
     tileSizeInput = add_ui_to_line(createInput('3', 'number'))
     tileSizeInput.style('width:30pt')
     tileSizeInput.input(function() {
-        _update_loader_with_ui()
+        if (_update_loader_with_ui())
+            _reload()
     })
 
     add_separator_to_line()
@@ -134,7 +150,8 @@ function createUI() {
     tileStepInput = add_ui_to_line(createInput('3', 'number'))
     tileStepInput.style('width:30pt')
     tileStepInput.input(function() {
-        _update_loader_with_ui()
+        if (_update_loader_with_ui())
+            _reload()
     })
 
     add_separator_to_line()
@@ -143,7 +160,8 @@ function createUI() {
     tileOverlapInput = add_ui_to_line(createInput('0', 'number'))
     tileOverlapInput.style('width:30pt')
     tileOverlapInput.input(function() {
-        _update_loader_with_ui()
+        if (_update_loader_with_ui())
+            _reload()
     })
 
     start_ui_line()
@@ -173,6 +191,7 @@ function createUI() {
     let drawSmoothCheck = add_ui_to_line(createCheckbox('Smooth scale tile images', false))
     drawSmoothCheck.mouseClicked(function(){
         enableDrawSmooth(drawSmoothCheck.checked())
+        triggerFullRedraw()
     })
 
     start_ui_line()
@@ -194,16 +213,23 @@ function createUI() {
         noLoop()
     })
 
+    add_separator_to_line()
+
+    let cancelButton = add_ui_to_line(createButton('Cancel'))
+    cancelButton.mouseClicked(function() {
+        imageSelect.selected('Choose a tile set')
+        _update_file_label()
+        stop_all_algorithms()
+    })
 
     start_ui_line()
 
-    add_ui_to_line(createSpan("<h3>Debug Helpers</h3>"))
-
-    start_ui_line()
+    add_ui_to_line(createSpan('<h3 style="font-size:14pt">Debug Helpers</h3>'))
 
     let showNeighborsCheck = add_ui_to_line(createCheckbox('Show tile neighbors'))
     showNeighborsCheck.mouseClicked(function(){
         enableDrawTileOptions(showNeighborsCheck.checked())
+        triggerFullRedraw()
         loop()
     })
 
@@ -225,6 +251,7 @@ function createUI() {
     let showEdgesCheck = add_ui_to_line(createCheckbox('Show unique tile edges'))
     showEdgesCheck.mouseClicked(function(){
         enableDrawEdges(showEdgesCheck.checked())
+        triggerFullRedraw()
         loop()
     })
 
