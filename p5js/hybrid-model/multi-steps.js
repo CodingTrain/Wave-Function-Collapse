@@ -43,9 +43,10 @@ function run_current_algorithm() {
 function run_current_algorithm_at_fps() {
     let progress = undefined
 
-    if (frameRate >= 10 && run_frequency < max_run_frequency)
+    const fps = frameRate()
+    if (fps >= 10 && run_frequency < max_run_frequency)
         run_frequency *= 1.5
-    else if (frameRate < 3 && run_frequency > min_run_frequency)
+    else if (fps < 3 && run_frequency > min_run_frequency)
         run_frequency /= 2
 
     for (let i = 0; i < run_frequency; i++) {
