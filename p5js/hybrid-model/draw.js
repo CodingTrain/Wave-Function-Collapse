@@ -3,6 +3,11 @@ function enableDrawSmooth(enabled) {
   isSmoothDrawingEnabled = enabled
 }
 
+let isFullRedrawTriggered = false
+function triggerFullRedraw() {
+  isFullRedrawTriggered = true
+}
+
 function drawGrid() {
   if (isSmoothDrawingEnabled)
     smooth()
@@ -19,12 +24,14 @@ function drawGrid() {
       let cell = grid[i + j * DIM]
       if (cell == undefined)
         continue
-      if (!cell.updated)
+      if (!cell.updated && !isFullRedrawTriggered)
         continue
       cell.updated = false
       cell.draw(i, j, w, h)
     }
   }
+
+  isFullRedrawTriggered = false
   
   smooth()
 }

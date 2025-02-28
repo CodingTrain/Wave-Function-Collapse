@@ -48,10 +48,10 @@ class Cell {
         let g = 0
         let b = 0
         let count = 0
-        for (let tileIndex in this.options.bits) {
+        for (let tileIndex of this.options) {
           const tile = tiles[tileIndex]
           if (tile != undefined) {
-            const center = tile.img.pixels.length / 2
+            const center = (Math.floor((tile.img.height) / 2) * tile.img.width + Math.floor((tile.img.width) / 2)) * 4
             r += tile.img.pixels[center + 0] * tile.frequency
             g += tile.img.pixels[center + 1] * tile.frequency
             b += tile.img.pixels[center + 2] * tile.frequency
@@ -59,7 +59,7 @@ class Cell {
           }
         }
         if (count > 0)
-          fill(r/count | 0, g/count | 0, b/count | 0, 48)
+          fill(r/count | 0, g/count | 0, b/count | 0, 80)
         else
           fill(51)
         rect(x + 1, y + 1, w-2, h-2)
