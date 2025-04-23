@@ -85,11 +85,16 @@ class Cell {
         sumG /= this.options.length;
         sumB /= this.options.length;
         fill(sumR, sumG, sumB);
-        noStroke();
         square(this.x, this.y, this.w);
+
+        fill(0);
+        noStroke();
+        textSize(this.w / 2);
+        textAlign(CENTER, CENTER);
+        text(this.options.length, this.x + this.w / 2, this.y + this.w / 2);
       }
       // No need to redraw until something has changed
-      this.needsRedraw = false;
+      this.needsRedraw = true;
     }
   }
 }

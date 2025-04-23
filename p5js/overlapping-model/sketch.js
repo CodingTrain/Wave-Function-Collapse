@@ -7,7 +7,7 @@ let grid;
 
 // Refactored variables names
 // Number of cells along one dimension of the grid
-let GRID_SIZE = 50;
+let GRID_SIZE = 20;
 // Maximum depth for recursive checking of cells
 let MAX_RECURSION_DEPTH = 16;
 // Size of each tile (3x3 by default)
@@ -23,7 +23,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(500, 500);
+  createCanvas(800, 800);
   // Cell width based on canvas size and grid size
   w = width / GRID_SIZE;
 
@@ -47,6 +47,15 @@ function setup() {
       reduceEntropy(grid, cell, 0);
     }
   }
+  // add pause checkbox
+  let pauseCheckbox = createCheckbox('Pause', false);
+  pauseCheckbox.changed(() => {
+    if (pauseCheckbox.checked()) {
+      noLoop();
+    } else {
+      loop();
+    }
+  });
 }
 
 function initializeGrid() {
@@ -63,6 +72,7 @@ function initializeGrid() {
       count++;
     }
   }
+
 }
 
 function draw() {
