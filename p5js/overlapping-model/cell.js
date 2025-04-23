@@ -94,7 +94,7 @@ class Cell {
         text(this.options.length, this.x + this.w / 2, this.y + this.w / 2);
       }
       // No need to redraw until something has changed
-      this.needsRedraw = true;
+      this.needsRedraw = false;
     }
   }
 }

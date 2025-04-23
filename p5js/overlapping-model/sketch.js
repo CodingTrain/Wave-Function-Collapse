@@ -7,15 +7,15 @@ let grid;
 
 // Refactored variables names
 // Number of cells along one dimension of the grid
-let GRID_SIZE = 20;
+let GRID_SIZE = 100;
 // Maximum depth for recursive checking of cells
-let MAX_RECURSION_DEPTH = 16;
+let MAX_RECURSION_DEPTH = 1000;
 // Size of each tile (3x3 by default)
 let TILE_SIZE = 3;
 let w;
 
 // Turn on or off rotations and reflections
-const ROTATIONS = true;
+const ROTATIONS = false;
 const REFLECTIONS = false;
 
 function preload() {
@@ -152,7 +152,7 @@ function wfc() {
 
 function reduceEntropy(grid, cell, depth) {
   // Stop propagation if max depth is reached or cell already checked
-  if (depth > MAX_RECURSION_DEPTH || cell.checked) return;
+  if (depth > MAX_RECURSION_DEPTH) return;
 
   // Mark cell as checked
   cell.checked = true;
@@ -207,9 +207,15 @@ function checkOptions(cell, neighbor, direction) {
       validOptions = validOptions.concat(tiles[option].neighbors[direction]);
     }
 
+    let oldOptLength = neighbor.options.length;
     // Filter the neighbor's options to retain only those that are valid
     neighbor.options = neighbor.options.filter((elt) => validOptions.includes(elt));
-    return true;
+
+    if (neighbor.options.length < oldOptLength) {
+      return true;
+    }else{
+      return false;
+    }
   } else {
     return false;
   }
