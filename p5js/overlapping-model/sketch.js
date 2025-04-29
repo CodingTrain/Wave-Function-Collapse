@@ -19,13 +19,18 @@ let w;
 let reductionQueue = [];
 let chooseModelDropDown;
 let queueLengthTextBox;
+let gridCopy;
+let chosenCellIndex;
+let shuffledOptions = [];
+let PARADOX = "paradox";
+let recoveringParadox = false;
 
 // Turn on or off rotations and reflections
 const ROTATIONS = false;
 const REFLECTIONS = false;
 
 function preload() {
-  sourceImage = loadImage('images/Flowers.png');
+  sourceImage = loadImage('images/3Bricks.png');
 }
 
 function setup() {
@@ -98,6 +103,22 @@ function setupTiles() {
   loop();
 }
 
+function reInitializeGrid(gridSave) {
+  grid = [];
+  // Initialize the grid with cells from the saved grid
+  let count = 0;
+  for (let j = 0; j < GRID_SIZE; j++) {
+    for (let i = 0; i < GRID_SIZE; i++) {
+      let cell = new Cell(tiles, i * w, j * w, w, count);
+      cell.options = gridSave[count].options;
+      cell.collapsed = gridSave[count].collapsed;
+      cell.needsRedraw = true;
+      grid.push(cell);
+      count++;
+    }
+  }
+}
+
 function initializeGrid() {
   // Clear the background
   background(0);
@@ -132,46 +153,57 @@ function draw() {
 // The Wave Function Collapse algorithm
 function wfc() {
   if (reductionQueue.length == 0) {
-    // Calculate entropy for each cell
-    for (let cell of grid) {
-      cell.calculateEntropy();
-    }
+    if (!recoveringParadox) {
+      // Calculate entropy for each cell
+      for (let cell of grid) {
+        cell.calculateEntropy();
+      }
 
-    // Find cells with the lowest entropy (simplified as fewest options left)
-    // Thie refactored method to find the lowest entropy cells avoids sorting
-    let minEntropy = Infinity;
-    let lowestEntropyCells = [];
+      // Find cells with the lowest entropy (simplified as fewest options left)
+      // Thie refactored method to find the lowest entropy cells avoids sorting
+      let minEntropy = Infinity;
+      let lowestEntropyCells = [];
 
-    for (let cell of grid) {
-      if (!cell.collapsed) {
-        if (cell.entropy < minEntropy) {
-          minEntropy = cell.entropy;
-          lowestEntropyCells = [cell];
-        } else if (cell.entropy === minEntropy) {
-          lowestEntropyCells.push(cell);
+      for (let cell of grid) {
+        if (!cell.collapsed) {
+          if (cell.entropy < minEntropy) {
+            minEntropy = cell.entropy;
+            lowestEntropyCells = [cell];
+          } else if (cell.entropy === minEntropy) {
+            lowestEntropyCells.push(cell);
+          }
         }
       }
+
+      // We're done if all cells are collapsed!
+      if (lowestEntropyCells.length == 0) {
+        noLoop();
+        return;
+      }
+
+      // Randomly select one of the lowest entropy cells to collapse
+      const cell = random(lowestEntropyCells);
+      cell.collapsed = true;
+
+      // Need to redraw this cell
+      cell.needsRedraw = true;
+
+      // copying in case something would go wrong
+      chosenCellIndex = cell.index;
+      gridCopy = JSON.parse(JSON.stringify(grid));
+      shuffledOptions = shuffle(cell.options);
     }
-
-    // We're done if all cells are collapsed!
-    if (lowestEntropyCells.length == 0) {
-      noLoop();
-      return;
-    }
-
-    // Randomly select one of the lowest entropy cells to collapse
-    const cell = random(lowestEntropyCells);
-    cell.collapsed = true;
-
-    // Need to redraw this cell
-    cell.needsRedraw = true;
+    // TODO - rerun this code if we did not converge
 
     // Choose one option randomly from the cell's options
-    const pick = random(cell.options);
+    const pick = shuffledOptions.pop();
+    recoveringParadox = false;
+
 
     // If there are no possible tiles that fit there!
     if (pick == undefined) {
       console.log('Pick undefined: ran into a conflict');
+      console.log("This should not happend if we have paradox recovery");
       // initializeGrid();
       return;
     }
@@ -179,10 +211,11 @@ function wfc() {
     // Changing logic to gradually reduce entropy
 
     // Set the final tile
-    cell.options = [pick];
+    let workingCell = grid[chosenCellIndex];
+    workingCell.options = [pick];
 
     // add to queue
-    addToQueue(reductionQueue, cell, 0);
+    addToQueue(reductionQueue, workingCell, 0);
   }
   else {
     let startTime = performance.now();
@@ -190,7 +223,13 @@ function wfc() {
     // Propagate entropy reduction to neighbors
     let reductionCount = 0;
     while (reductionQueue.length > 0) {
-      reduceEntropyOnce(grid, reductionQueue);
+      let result = reduceEntropyOnce(grid, reductionQueue);
+      if (result === PARADOX) {
+        reductionQueue = [];
+        recoveringParadox = true;
+        reInitializeGrid(gridCopy);
+        break;
+      }
       reductionCount++;
       if (reductionCount > reductionPerFrame) {
         break;
@@ -255,7 +294,7 @@ function reduceEntropyOnce(grid, cellDepthQueueArray) {
     console.log("Updating cell: ran into a conflict");
     // Need to redraw this cell
     cell.needsRedraw = true;
-    return "No options left";
+    return PARADOX;
   }
 
   if (cell.options.length == 1) {
