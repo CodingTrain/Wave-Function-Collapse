@@ -1,5 +1,6 @@
 // Saving the log of 2 for shannon entropy calculation
 const log2 = Math.log(2);
+const SHOW_OPTION_COUNT_IN_CELL = false;
 
 // A Cell is a single element of the grid
 class Cell {
@@ -85,13 +86,17 @@ class Cell {
         sumG /= this.options.length;
         sumB /= this.options.length;
         fill(sumR, sumG, sumB);
-        square(this.x, this.y, this.w);
-
-        fill(0);
         noStroke();
-        textSize(this.w / 2);
-        textAlign(CENTER, CENTER);
-        text(this.options.length, this.x + this.w / 2, this.y + this.w / 2);
+        square(this.x, this.y, this.w);
+        
+        if (SHOW_OPTION_COUNT_IN_CELL) {
+          fill(0);
+          noStroke();
+          textSize(this.w / 2);
+          textAlign(CENTER, CENTER);
+          text(this.options.length, this.x + this.w / 2, this.y + this.w / 2);
+        }
+
       }
       // No need to redraw until something has changed
       this.needsRedraw = false;
