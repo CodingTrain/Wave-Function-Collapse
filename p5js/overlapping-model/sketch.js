@@ -231,7 +231,7 @@ function wfc() {
         break;
       }
       reductionCount++;
-      if (reductionCount > reductionPerFrame) {
+      if (reductionCount >= reductionPerFrame) {
         break;
       }
     }
