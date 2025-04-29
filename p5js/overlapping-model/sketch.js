@@ -7,15 +7,18 @@ let grid;
 
 // Refactored variables names
 // Number of cells along one dimension of the grid
-let GRID_SIZE = 80;
+let GRID_SIZE = 120;
 // Maximum depth for recursive checking of cells
 let MAX_RECURSION_DEPTH = 1000000000;
-const REDUCTIONS_PER_FRAME = 10000;
+// const REDUCTIONS_PER_FRAME = 10000;
+let reductionPerFrame = 1000;
+const TARGET_UPDATE_TIME_MS = 15; // Target frame rate of 60 FPS
 // Size of each tile (3x3 by default)
 let TILE_SIZE = 3;
 let w;
 let reductionQueue = [];
 let chooseModelDropDown;
+let queueLengthTextBox;
 
 // Turn on or off rotations and reflections
 const ROTATIONS = false;
@@ -26,23 +29,12 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(800, 800);
+  createCanvas(720, 720);
   // Cell width based on canvas size and grid size
   w = width / GRID_SIZE;
 
   setupTiles();
 
-  // // Perform initial wave function collapse step
-  // wfc();
-
-  // // The WFC function only collapses one cell at a time
-  // // This extra bit collapses any other cells that can be
-  // for (let cell of grid) {
-  //   if (cell.options.length == 1) {
-  //     cell.collapsed = true;
-  //     reduceEntropyOnce(grid, cell, 0);
-  //   }
-  // }
   // add pause checkbox
   let pauseCheckbox = createCheckbox('Pause', false);
   pauseCheckbox.changed(() => {
@@ -58,12 +50,19 @@ function setup() {
   chooseModelDropDown.changed(() => {
     // Get the selected value
     const selectedValue = chooseModelDropDown.value();
-    // Load the selected image
-    sourceImage = loadImage(`images/${selectedValue}`, () => {
-      // Setup tiles again with the new image
+    // check if it is the file name ending with png
+    if (selectedValue.endsWith('.png')) {
+      // Load the selected image
+      sourceImage = loadImage(`images/${selectedValue}`, () => {
+        // Setup tiles again with the new image
+        setupTiles();
+      });
+    } else {
       setupTiles();
-    });
+    }
   });
+
+  chooseModelDropDown.option("-deafault-");
 
   fetch('images/list.txt')
     .then(response => response.text())
@@ -73,9 +72,19 @@ function setup() {
         chooseModelDropDown.option(image);
       });
     });
+
+  // Add restart button
+  let restartButton = createButton('Restart');
+  restartButton.mousePressed(() => {
+    setupTiles();
+  });
+
+  // Add a textbox that will show queue length
+  queueLengthTextBox = createP("Processed queue: " + reductionQueue.length);
+
 }
 
-function setupTiles(){
+function setupTiles() {
   // Extract tiles and calculate their adjacencies
   tiles = extractTiles(sourceImage);
   for (let tile of tiles) {
@@ -162,7 +171,7 @@ function wfc() {
 
     // If there are no possible tiles that fit there!
     if (pick == undefined) {
-      console.log('ran into a conflict');
+      console.log('Pick undefined: ran into a conflict');
       // initializeGrid();
       return;
     }
@@ -176,15 +185,31 @@ function wfc() {
     addToQueue(reductionQueue, cell, 0);
   }
   else {
+    let startTime = performance.now();
+
     // Propagate entropy reduction to neighbors
     let reductionCount = 0;
     while (reductionQueue.length > 0) {
       reduceEntropyOnce(grid, reductionQueue);
       reductionCount++;
-      if (reductionCount > REDUCTIONS_PER_FRAME) {
+      if (reductionCount > reductionPerFrame) {
         break;
       }
     }
+
+
+    let endTime = performance.now();
+    let spentTime = endTime - startTime;
+
+    const suggestedReductionsPerFrame = Math.floor(reductionCount * TARGET_UPDATE_TIME_MS / spentTime);
+    if (suggestedReductionsPerFrame > 0 && suggestedReductionsPerFrame < MAX_RECURSION_DEPTH &&
+      (reductionPerFrame * 2 < suggestedReductionsPerFrame
+        || reductionPerFrame * (1. / 2.) > suggestedReductionsPerFrame)) {
+      reductionPerFrame = suggestedReductionsPerFrame;
+    }
+
+    queueLengthTextBox.html(`Processed queue (out of ${reductionPerFrame}): ${reductionCount}`);
+    // your drawing code here
 
     // // Collapse anything that can be!
     // for (let cell of grid) {
@@ -220,14 +245,16 @@ function reduceEntropyOnce(grid, cellDepthQueueArray) {
 
   // Stop propagation if max depth is reached or cell already checked
   if (depth > MAX_RECURSION_DEPTH) return "Recursion limit reached";
-  console.log("Recursion depth limit reached at " + depth);
+  // console.log("Recursion depth limit reached at " + depth);
 
   // Mark cell as checked
   cell.checked = true;
 
   if (cell.options.length == 0) {
     // Ignore conflicts
-    console.log("Ran into a conflict");
+    console.log("Updating cell: ran into a conflict");
+    // Need to redraw this cell
+    cell.needsRedraw = true;
     return "No options left";
   }
 
@@ -235,7 +262,6 @@ function reduceEntropyOnce(grid, cellDepthQueueArray) {
     cell.collapsed = true;
   }
 
-  // Need to redraw this cell
   cell.needsRedraw = true;
 
   let index = cell.index;
