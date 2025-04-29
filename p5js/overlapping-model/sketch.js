@@ -84,6 +84,9 @@ function setupTiles(){
 
   // Create the grid
   initializeGrid();
+
+  // start the loop if not already
+  loop();
 }
 
 function initializeGrid() {
@@ -160,7 +163,7 @@ function wfc() {
     // If there are no possible tiles that fit there!
     if (pick == undefined) {
       console.log('ran into a conflict');
-      initializeGrid();
+      // initializeGrid();
       return;
     }
 
@@ -217,9 +220,16 @@ function reduceEntropyOnce(grid, cellDepthQueueArray) {
 
   // Stop propagation if max depth is reached or cell already checked
   if (depth > MAX_RECURSION_DEPTH) return "Recursion limit reached";
+  console.log("Recursion depth limit reached at " + depth);
 
   // Mark cell as checked
   cell.checked = true;
+
+  if (cell.options.length == 0) {
+    // Ignore conflicts
+    console.log("Ran into a conflict");
+    return "No options left";
+  }
 
   if (cell.options.length == 1) {
     cell.collapsed = true;
