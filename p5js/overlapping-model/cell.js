@@ -17,8 +17,6 @@ class Cell {
 
     // Has it been collapsed to a single tile?
     this.collapsed = false;
-    // Has it already been checked during recursion?
-    this.checked = false;
 
     // Initialize the options with all possible tile indices
     for (let i = 0; i < tiles.length; i++) {
@@ -26,7 +24,8 @@ class Cell {
     }
 
     // This keeps track of what the previous options were
-    // Saves recalculating entropy if nothing has changed
+    // Saves time recalculating entropy if nothing has changed
+    // TODO (Sergey): I think this should not be needed, but let's keep until someone varifies that
     this.previousTotalOptions = -1;
 
     // Variable to track if cell needs to be redrawn
