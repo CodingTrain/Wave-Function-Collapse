@@ -15,6 +15,7 @@ const REDUCTIONS_PER_FRAME = 10000;
 let TILE_SIZE = 3;
 let w;
 let reductionQueue = [];
+let chooseModelDropDown;
 
 // Turn on or off rotations and reflections
 const ROTATIONS = false;
@@ -29,14 +30,7 @@ function setup() {
   // Cell width based on canvas size and grid size
   w = width / GRID_SIZE;
 
-  // Extract tiles and calculate their adjacencies
-  tiles = extractTiles(sourceImage);
-  for (let tile of tiles) {
-    tile.calculateNeighbors(tiles);
-  }
-
-  // Create the grid
-  initializeGrid();
+  setupTiles();
 
   // // Perform initial wave function collapse step
   // wfc();
@@ -58,6 +52,38 @@ function setup() {
       loop();
     }
   });
+
+  chooseModelDropDown = createSelect();
+  // add logic to selection
+  chooseModelDropDown.changed(() => {
+    // Get the selected value
+    const selectedValue = chooseModelDropDown.value();
+    // Load the selected image
+    sourceImage = loadImage(`images/${selectedValue}`, () => {
+      // Setup tiles again with the new image
+      setupTiles();
+    });
+  });
+
+  fetch('images/list.txt')
+    .then(response => response.text())
+    .then(text => {
+      const images = text.split('\n').filter(name => name.trim() !== '');
+      images.forEach(image => {
+        chooseModelDropDown.option(image);
+      });
+    });
+}
+
+function setupTiles(){
+  // Extract tiles and calculate their adjacencies
+  tiles = extractTiles(sourceImage);
+  for (let tile of tiles) {
+    tile.calculateNeighbors(tiles);
+  }
+
+  // Create the grid
+  initializeGrid();
 }
 
 function initializeGrid() {
