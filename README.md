@@ -46,6 +46,7 @@ Wave Function Collapse is a constraint-satisfaction algorithm inspired by quantu
 - [Highly optimized version supporting both single-image and pre-tiled source images](https://github.com/pierrebai/Wave-Function-Collapse)
   A detailed write-up of how the changes were done and why can be found in its own
   [readme here](https://github.com/pierrebai/Wave-Function-Collapse/tree/main/p5js/hybrid-model/README.md)
+- An optimised overlaping model using queues (instead of recurcion) and backtracking to avoid paradoxes. [Version @alin256](https://github.com/alin256/Wave-Function-Collapse/tree/efficientQueueBranch). The version also adds some GUI improvements.
 
 
 ## Key Resources
