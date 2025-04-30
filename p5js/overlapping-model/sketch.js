@@ -7,7 +7,7 @@ let grid;
 
 // Refactored variables names
 // Number of cells along one dimension of the grid
-let GRID_SIZE = 120;
+let GRID_SIZE = 20;
 // Maximum depth for recursive checking of cells
 let MAX_RECURSION_DEPTH = 1000000000;
 // const REDUCTIONS_PER_FRAME = 10000;
@@ -24,7 +24,6 @@ let gridCopy;
 let chosenCellIndex;
 
 let recoveringParadox = false;
-let requiresRestart = false;
 let reductionQueue = [];
 let shuffledOptions = [];
 
@@ -64,12 +63,10 @@ function setup() {
       sourceImage = loadImage(`images/${selectedValue}`, () => {
         // Setup tiles again with the new image
         console.log(`Loading new image.`);
-        requiresRestart = true;
-        //setupTiles();
+        setupTiles();
       });
     } else {
-      requiresRestart = true;
-      // setupTiles();
+      setupTiles();
     }
   });
 
@@ -87,8 +84,7 @@ function setup() {
   // Add restart button
   let restartButton = createButton('Restart');
   restartButton.mousePressed(() => {
-    requiresRestart = true;
-    //setupTiles();
+    setupTiles();
   });
 
   // Add a textbox that will show queue length
@@ -108,7 +104,6 @@ function setupTiles() {
 
   // resetting simulation state variables
   recoveringParadox = false;
-  requiresRestart = false;
   reductionQueue = [];
   shuffledOptions = [];  
 
@@ -150,11 +145,6 @@ function initializeGrid() {
 }
 
 function draw() {
-  if (requiresRestart) {
-    setupTiles();
-    requiresRestart = false;
-    return;
-  }
   // Run Wave Function Collapse
   wfc();
 
@@ -279,6 +269,7 @@ function wfc() {
 }
 
 function addToQueue(cellDepthQueueArray, cell, depth) {
+  // TODO implment a O(1) queue for better performance
   // Check if the cell is already in the queue
   for (let i = 0; i < cellDepthQueueArray.length; i++) {
     if (cellDepthQueueArray[i].cell.index == cell.index) {
@@ -375,6 +366,7 @@ function checkOptionsReduced(cell, neighbor, direction) {
   // Check if the neighbor is valid and not already collapsed
   if (neighbor && !neighbor.collapsed) {
     // Collect valid options based on the current cell's adjacency rules
+    // TODO implement options as sets with O(min(n, k)) for intersection for faster performance
     let validOptions = [];
     for (let option of cell.options) {
       if (!tiles[option]) {
