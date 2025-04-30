@@ -15,15 +15,18 @@ let reductionPerFrame = 1000;
 const TARGET_UPDATE_TIME_MS = 15; // Target frame rate of 60 FPS
 // Size of each tile (3x3 by default)
 let TILE_SIZE = 3;
+let PARADOX = "paradox";
 let w;
-let reductionQueue = [];
+
 let chooseModelDropDown;
 let queueLengthTextBox;
 let gridCopy;
 let chosenCellIndex;
-let shuffledOptions = [];
-let PARADOX = "paradox";
+
 let recoveringParadox = false;
+let requiresRestart = false;
+let reductionQueue = [];
+let shuffledOptions = [];
 
 // Turn on or off rotations and reflections
 const ROTATIONS = false;
@@ -60,10 +63,13 @@ function setup() {
       // Load the selected image
       sourceImage = loadImage(`images/${selectedValue}`, () => {
         // Setup tiles again with the new image
-        setupTiles();
+        console.log(`Loading new image.`);
+        requiresRestart = true;
+        //setupTiles();
       });
     } else {
-      setupTiles();
+      requiresRestart = true;
+      // setupTiles();
     }
   });
 
@@ -81,7 +87,8 @@ function setup() {
   // Add restart button
   let restartButton = createButton('Restart');
   restartButton.mousePressed(() => {
-    setupTiles();
+    requiresRestart = true;
+    //setupTiles();
   });
 
   // Add a textbox that will show queue length
@@ -98,6 +105,12 @@ function setupTiles() {
 
   // Create the grid
   initializeGrid();
+
+  // resetting simulation state variables
+  recoveringParadox = false;
+  requiresRestart = false;
+  reductionQueue = [];
+  shuffledOptions = [];  
 
   // start the loop if not already
   loop();
@@ -137,6 +150,11 @@ function initializeGrid() {
 }
 
 function draw() {
+  if (requiresRestart) {
+    setupTiles();
+    requiresRestart = false;
+    return;
+  }
   // Run Wave Function Collapse
   wfc();
 
@@ -359,6 +377,9 @@ function checkOptionsReduced(cell, neighbor, direction) {
     // Collect valid options based on the current cell's adjacency rules
     let validOptions = [];
     for (let option of cell.options) {
+      if (!tiles[option]) {
+        continue;
+      }
       validOptions = validOptions.concat(tiles[option].neighbors[direction]);
     }
 
