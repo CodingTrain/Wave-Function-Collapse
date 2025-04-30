@@ -224,7 +224,8 @@ function wfc() {
     addToQueue(reductionQueue, workingCell, 0);
   }
   else {
-    let startTime = performance.now();
+    const startTime = performance.now();
+    let endTime = performance.now();
 
     // Propagate entropy reduction to neighbors
     let reductionCount = 0;
@@ -237,32 +238,13 @@ function wfc() {
         break;
       }
       reductionCount++;
-      if (reductionCount >= reductionPerFrame) {
+      endTime = performance.now();
+      if (endTime - startTime >= TARGET_UPDATE_TIME_MS) {
         break;
       }
     }
 
-
-    let endTime = performance.now();
-    let spentTime = endTime - startTime;
-
-    const suggestedReductionsPerFrame = Math.floor(reductionCount * TARGET_UPDATE_TIME_MS / spentTime);
-    if (suggestedReductionsPerFrame > 0 && suggestedReductionsPerFrame < MAX_RECURSION_DEPTH &&
-      (reductionPerFrame * 2 < suggestedReductionsPerFrame
-        || reductionPerFrame * (1. / 2.) > suggestedReductionsPerFrame)) {
-      reductionPerFrame = suggestedReductionsPerFrame;
-    }
-
-    queueLengthTextBox.html(`Processed queue (out of ${reductionPerFrame}): ${reductionCount}`);
-    // your drawing code here
-
-    // // Collapse anything that can be!
-    // for (let cell of grid) {
-    //   if (cell.options.length == 1) {
-    //     cell.collapsed = true;
-    //     addToQueue(reductionQueue, cell, 0);
-    //   }
-    // }
+    queueLengthTextBox.html(`Processed queue: ${reductionCount}`);
   }
 }
 
