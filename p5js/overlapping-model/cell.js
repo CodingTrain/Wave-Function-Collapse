@@ -1,5 +1,6 @@
 // Saving the log of 2 for shannon entropy calculation
 const log2 = Math.log(2);
+const SHOW_OPTION_COUNT_IN_CELL = false;
 
 // A Cell is a single element of the grid
 class Cell {
@@ -16,8 +17,6 @@ class Cell {
 
     // Has it been collapsed to a single tile?
     this.collapsed = false;
-    // Has it already been checked during recursion?
-    this.checked = false;
 
     // Initialize the options with all possible tile indices
     for (let i = 0; i < tiles.length; i++) {
@@ -25,7 +24,8 @@ class Cell {
     }
 
     // This keeps track of what the previous options were
-    // Saves recalculating entropy if nothing has changed
+    // Saves time recalculating entropy if nothing has changed
+    // TODO (Sergey): I think this should not be needed, but let's keep until someone varifies that
     this.previousTotalOptions = -1;
 
     // Variable to track if cell needs to be redrawn
@@ -87,6 +87,15 @@ class Cell {
         fill(sumR, sumG, sumB);
         noStroke();
         square(this.x, this.y, this.w);
+        
+        if (SHOW_OPTION_COUNT_IN_CELL) {
+          fill(0);
+          noStroke();
+          textSize(this.w / 2);
+          textAlign(CENTER, CENTER);
+          text(this.options.length, this.x + this.w / 2, this.y + this.w / 2);
+        }
+
       }
       // No need to redraw until something has changed
       this.needsRedraw = false;
